@@ -1,0 +1,189 @@
+PR-Gate-Frontend/
++-- .github/
+|   \-- workflows/
+|       \-- quality.yml
++-- docs/
+|   +-- architecture.md
+|   \-- file-tree.txt
++-- public/
+|   \-- mockServiceWorker.js
++-- src/
+|   +-- app/
+|   |   +-- config/
+|   |   |   +-- env.config.test.ts
+|   |   |   +-- env.config.ts
+|   |   |   +-- query-client.config.ts
+|   |   |   \-- routes.config.ts
+|   |   +-- di/
+|   |   |   +-- container.ts
+|   |   |   \-- dependencies.ts
+|   |   +-- layouts/
+|   |   |   +-- auth-layout.tsx
+|   |   |   +-- dashboard-layout.tsx
+|   |   |   \-- main-layout.tsx
+|   |   +-- providers/
+|   |   |   +-- app-providers.tsx
+|   |   |   +-- auth-provider.tsx
+|   |   |   \-- query-provider.tsx
+|   |   +-- router/
+|   |   |   +-- app-router.tsx
+|   |   |   +-- guards.test.tsx
+|   |   |   +-- protected-route.tsx
+|   |   |   +-- role-guard.tsx
+|   |   |   \-- static-pages.tsx
+|   |   \-- app.tsx
+|   +-- features/
+|   |   +-- ai-practice/
+|   |   |   +-- application/
+|   |   |   |   \-- README.md
+|   |   |   +-- domain/
+|   |   |   |   \-- README.md
+|   |   |   +-- infrastructure/
+|   |   |   |   \-- README.md
+|   |   |   +-- presentation/
+|   |   |   |   \-- pages/
+|   |   |   |       \-- ai-practice.page.tsx
+|   |   |   \-- index.ts
+|   |   +-- cicd/
+|   |   |   +-- application/
+|   |   |   |   \-- README.md
+|   |   |   +-- domain/
+|   |   |   |   \-- README.md
+|   |   |   +-- infrastructure/
+|   |   |   |   \-- README.md
+|   |   |   +-- presentation/
+|   |   |   |   \-- pages/
+|   |   |   |       \-- cicd.page.tsx
+|   |   |   \-- index.ts
+|   |   +-- metrics/
+|   |   |   +-- application/
+|   |   |   |   \-- README.md
+|   |   |   +-- domain/
+|   |   |   |   \-- README.md
+|   |   |   +-- infrastructure/
+|   |   |   |   \-- README.md
+|   |   |   +-- presentation/
+|   |   |   |   \-- pages/
+|   |   |   |       \-- metrics.page.tsx
+|   |   |   \-- index.ts
+|   |   +-- notifications/
+|   |   |   +-- application/
+|   |   |   |   \-- README.md
+|   |   |   +-- domain/
+|   |   |   |   \-- README.md
+|   |   |   +-- infrastructure/
+|   |   |   |   \-- README.md
+|   |   |   +-- presentation/
+|   |   |   |   \-- pages/
+|   |   |   |       \-- notifications.page.tsx
+|   |   |   \-- index.ts
+|   |   +-- projects/
+|   |   |   +-- application/
+|   |   |   |   \-- use-cases/
+|   |   |   |       +-- create-project.use-case.ts
+|   |   |   |       +-- get-project-by-id.use-case.ts
+|   |   |   |       +-- get-projects.use-case.test.ts
+|   |   |   |       \-- get-projects.use-case.ts
+|   |   |   +-- domain/
+|   |   |   |   +-- entities/
+|   |   |   |   |   +-- project.entity.test.ts
+|   |   |   |   |   \-- project.entity.ts
+|   |   |   |   \-- repositories/
+|   |   |   |       \-- project.repository.ts
+|   |   |   +-- infrastructure/
+|   |   |   |   +-- dto/
+|   |   |   |   |   \-- project-response.dto.ts
+|   |   |   |   +-- mappers/
+|   |   |   |   |   +-- project.mapper.test.ts
+|   |   |   |   |   \-- project.mapper.ts
+|   |   |   |   +-- repositories/
+|   |   |   |   |   \-- project.repository.impl.ts
+|   |   |   |   \-- services/
+|   |   |   |       +-- project-api.service.test.ts
+|   |   |   |       \-- project-api.service.ts
+|   |   |   +-- presentation/
+|   |   |   |   +-- components/
+|   |   |   |   |   +-- project-card.tsx
+|   |   |   |   |   +-- project-form.tsx
+|   |   |   |   |   \-- project-table.tsx
+|   |   |   |   +-- hooks/
+|   |   |   |   |   +-- projects-context.ts
+|   |   |   |   |   +-- use-create-project.ts
+|   |   |   |   |   +-- use-projects.test.tsx
+|   |   |   |   |   \-- use-projects.ts
+|   |   |   |   +-- pages/
+|   |   |   |   |   +-- project-detail.page.tsx
+|   |   |   |   |   +-- projects.page.test.tsx
+|   |   |   |   |   \-- projects.page.tsx
+|   |   |   |   \-- schemas/
+|   |   |   |       \-- project.schema.ts
+|   |   |   \-- index.ts
+|   |   \-- users/
+|   |       +-- application/
+|   |       |   \-- README.md
+|   |       +-- domain/
+|   |       |   +-- entities/
+|   |       |   |   \-- user.entity.ts
+|   |       |   \-- README.md
+|   |       +-- infrastructure/
+|   |       |   +-- auth/
+|   |       |   |   +-- demo-session.adapter.ts
+|   |       |   |   \-- oidc-session.adapter.ts
+|   |       |   \-- README.md
+|   |       +-- presentation/
+|   |       |   \-- pages/
+|   |       |       +-- login.page.tsx
+|   |       |       \-- profile.page.tsx
+|   |       \-- index.ts
+|   +-- shared/
+|   |   +-- components/
+|   |   |   +-- common/
+|   |   |   |   \-- module-placeholder.tsx
+|   |   |   +-- feedback/
+|   |   |   |   +-- async-state.tsx
+|   |   |   |   \-- route-error.tsx
+|   |   |   \-- ui/
+|   |   |       +-- badge.tsx
+|   |   |       +-- button.tsx
+|   |   |       \-- dialog.tsx
+|   |   +-- services/
+|   |   |   +-- auth/
+|   |   |   |   +-- auth-context.ts
+|   |   |   |   \-- auth-session.service.ts
+|   |   |   \-- http/
+|   |   |       +-- axios.config.ts
+|   |   |       +-- http-client.ts
+|   |   |       +-- http-error.ts
+|   |   |       \-- interceptors.ts
+|   |   +-- stores/
+|   |   |   \-- ui.store.ts
+|   |   +-- styles/
+|   |   |   \-- globals.css
+|   |   \-- utils/
+|   |       \-- cn.ts
+|   +-- testing/
+|   |   +-- mocks/
+|   |   |   +-- browser.ts
+|   |   |   +-- fixtures.ts
+|   |   |   +-- handlers.ts
+|   |   |   \-- server.ts
+|   |   +-- setup.ts
+|   |   \-- test-providers.tsx
+|   +-- main.tsx
+|   \-- vite-env.d.ts
++-- .dependency-cruiser.cjs
++-- .env.example
++-- .gitignore
++-- .prettierignore
++-- .prettierrc
++-- components.json
++-- eslint.config.js
++-- index.html
++-- LICENSE
++-- package-lock.json
++-- package.json
++-- README.md
++-- tsconfig.app.json
++-- tsconfig.json
++-- tsconfig.node.json
+\-- vite.config.ts

@@ -1,0 +1,50 @@
+@import 'tailwindcss';
+
+:root {
+  --background: #f7f8fa;
+  --foreground: #1d2d28;
+  --primary: #21654b;
+  --primary-foreground: #fff;
+  --muted: #f0f3f2;
+  --muted-foreground: #718079;
+  --border: #e4e9e6;
+}
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --font-sans: 'Segoe UI', system-ui, sans-serif;
+}
+@layer base {
+  body {
+    @apply m-0 bg-background font-sans text-foreground antialiased;
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700;
+  }
+  button {
+    @apply cursor-pointer;
+  }
+  button:disabled {
+    @apply cursor-not-allowed;
+  }
+}
+@layer components {
+  .input {
+    @apply block min-h-10 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm placeholder:text-slate-400;
+  }
+  .eyebrow {
+    @apply mb-2 text-[10px] font-semibold tracking-[.16em] text-emerald-800;
+  }
+  .page-title {
+    @apply text-3xl font-semibold tracking-tight sm:text-[32px];
+  }
+}
