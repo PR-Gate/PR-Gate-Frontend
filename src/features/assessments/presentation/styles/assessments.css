@@ -3,6 +3,7 @@
 }
 .test-page-heading {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: end;
   gap: 20px;
@@ -15,8 +16,7 @@
   letter-spacing: -0.03em;
   margin-top: 7px;
 }
-.test-page-heading p,
-.test-list-heading p {
+.test-page-heading p {
   color: var(--muted-foreground);
   margin-top: 8px;
   font-size: 13px;
@@ -86,14 +86,13 @@
   display: block;
   margin-top: 8px;
 }
-.test-list-heading {
+.test-header-actions {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: end;
-  margin-bottom: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 100%;
 }
-.test-list-heading h2,
 .test-today h2,
 .test-panel h2 {
   font-size: 18px;
@@ -566,7 +565,6 @@
 }
 @media (max-width: 700px) {
   .test-page-heading,
-  .test-list-heading,
   .test-today > div {
     flex-direction: column;
     align-items: stretch;
@@ -590,6 +588,13 @@
   }
   .test-search input {
     width: 100%;
+  }
+  .test-header-actions {
+    width: 100%;
+  }
+  .test-header-actions .test-search {
+    flex: 1;
+    min-width: 180px;
   }
   .test-list > li {
     grid-template-columns: 1fr;

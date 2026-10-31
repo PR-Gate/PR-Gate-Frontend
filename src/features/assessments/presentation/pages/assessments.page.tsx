@@ -57,13 +57,24 @@ export default function AssessmentsPage() {
           <h1>Tests para tus estudiantes</h1>
           <p>Crea una prueba, agrega preguntas y envíala a tu curso.</p>
         </div>
-        <Button
-          disabled={!catalog.data || catalog.isError}
-          onClick={() => setEditing(null)}
-        >
-          <Plus size={16} />
-          Crear un test
-        </Button>
+        <div className="test-header-actions">
+          <label className="test-search">
+            <Search size={16} aria-hidden="true" />
+            <input
+              aria-label="Buscar test"
+              placeholder="Buscar test"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </label>
+          <Button
+            disabled={!catalog.data || catalog.isError}
+            onClick={() => setEditing(null)}
+          >
+            <Plus size={16} />
+            Crear un test
+          </Button>
+        </div>
       </div>
       <p className="test-demo-note">
         Demostración · Datos simulados. Los cambios se conservan durante esta
@@ -131,21 +142,6 @@ export default function AssessmentsPage() {
                   <strong>{value}</strong>
                 </article>
               ))}
-            </div>
-            <div className="test-list-heading">
-              <div>
-                <h2>Mis tests</h2>
-                <p>Selecciona un test para ver las respuestas o editarlo.</p>
-              </div>
-              <label className="test-search">
-                <Search size={16} aria-hidden="true" />
-                <input
-                  aria-label="Buscar test"
-                  placeholder="Buscar test"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                />
-              </label>
             </div>
             {!tests.length ? (
               <EmptyState
