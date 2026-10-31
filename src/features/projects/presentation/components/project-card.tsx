@@ -9,7 +9,7 @@ export function ProjectCard({ project }: { project: Project }) {
   return (
     <article className="group flex h-full flex-col rounded-xl border border-border bg-white p-6 transition-shadow hover:shadow-md">
       <div className="mb-5 flex items-center justify-between">
-        <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-50 font-bold text-emerald-800">
+        <div className="flex size-11 items-center justify-center rounded-xl bg-primary-soft font-bold text-primary">
           {project.name.slice(0, 2).toUpperCase()}
         </div>
         <Badge
@@ -29,12 +29,12 @@ export function ProjectCard({ project }: { project: Project }) {
       <h2 className="text-lg font-semibold tracking-tight">
         <Link
           to={`/projects/${project.id}`}
-          className="flex items-start justify-between gap-2 hover:text-emerald-800"
+          className="flex items-start justify-between gap-2 hover:text-primary"
         >
           {project.name}
           <ArrowUpRight
             size={18}
-            className="mt-1 shrink-0 text-slate-400 group-hover:text-emerald-700"
+            className="mt-1 shrink-0 text-slate-400 group-hover:text-primary"
           />
         </Link>
       </h2>
@@ -46,7 +46,7 @@ export function ProjectCard({ project }: { project: Project }) {
           href={project.repositoryUrl ?? undefined}
           target="_blank"
           rel="noreferrer"
-          className="mb-5 flex items-center gap-2 truncate text-xs text-slate-600 hover:text-emerald-800"
+          className="mb-5 flex items-center gap-2 truncate text-xs text-slate-600 hover:text-primary"
         >
           <GitBranch size={14} />
           <span className="truncate">

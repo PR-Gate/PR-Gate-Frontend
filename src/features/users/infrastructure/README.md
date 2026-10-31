@@ -1,7 +1,7 @@
 # users / infrastructure
 
-Identidad y perfiles. Acordar contratos de consulta/edici?n de usuarios y permisos; los adaptadores OIDC y demo ya est?n implementados.
+Contiene los adaptadores OIDC/demo existentes y la integración HTTP de Estudiantes: StudentApiService, DTOs Zod, mappers y StudentRepositoryImpl.
 
-Implementar API service con HttpClient inyectado, DTO/schema Zod, mapper y repositorio. No consumir el service desde React ni inventar endpoints.
+StudentApiService recibe HttpClient por inyección y consume los endpoints provisionales de MSW `/demo/students` y `/demo/students/:studentId`, filtrados por curso. Los DTOs externos no llegan a los componentes React.
 
-Referencia funcional: features/projects. Los archivos de implementaci?n se a?adir?n progresivamente; esta carpeta documenta el l?mite de la capa.
+Cuando el backend esté disponible se confirmarán endpoints del gateway, identidad, permisos, paginación, DTOs y procedencia de los indicadores. No se presupone que las rutas de demo sean contratos reales. Véase docs/students.md.

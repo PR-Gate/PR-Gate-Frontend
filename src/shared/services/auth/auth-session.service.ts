@@ -4,10 +4,15 @@ export interface SessionUser {
   readonly email: string;
   readonly roles: readonly string[];
 }
+export type LoginProfile = 'teacher' | 'student';
+export interface LoginOptions {
+  profile?: LoginProfile;
+  loginHint?: string;
+}
 export interface AuthSessionService {
   getUser(): Promise<SessionUser | null>;
   getAccessToken(): Promise<string | undefined>;
-  login(): Promise<void>;
+  login(options?: LoginOptions): Promise<void>;
   logout(): Promise<void>;
   expire(): Promise<void>;
   subscribe(listener: () => void): () => void;

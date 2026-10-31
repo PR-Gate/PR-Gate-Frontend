@@ -1,10 +1,11 @@
 import { Outlet } from 'react-router';
+import { LoginBrandPanel } from '@/features/users/presentation/components/login-brand-panel';
+import '@/features/users/presentation/styles/login.css';
 export function AuthLayout() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#142b26] p-6">
-      <div className="w-full max-w-md rounded-2xl bg-white p-9 shadow-xl">
-        <Outlet />
-      </div>
+    <main className="login-shell" id="login-content">
+      <LoginBrandPanel />
+      <Outlet />
     </main>
   );
 }

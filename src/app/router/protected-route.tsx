@@ -12,6 +12,10 @@ export function ProtectedRoute() {
   return user ? (
     <Outlet />
   ) : (
-    <Navigate to="/login" state={{ from: location.pathname }} replace />
+    <Navigate
+      to="/login"
+      state={{ from: location.pathname + location.search + location.hash }}
+      replace
+    />
   );
 }

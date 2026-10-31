@@ -5,6 +5,10 @@ import { createQueryClient } from '../config/query-client.config';
 import type { AppDependencies } from '../di/dependencies';
 import { QueryProvider } from './query-provider';
 import { AuthProvider } from './auth-provider';
+import { TeacherOverviewContext } from '@/features/metrics/presentation/hooks/use-teacher-overview';
+import { AssessmentContext } from '@/features/assessments/presentation/hooks/use-assessments';
+import { RubricContext } from '@/features/rubrics/presentation/hooks/use-rubrics';
+import { StudentContext } from '@/features/users/presentation/hooks/use-students';
 export function AppProviders({
   dependencies,
   children,
@@ -17,7 +21,15 @@ export function AppProviders({
     <QueryProvider client={client}>
       <AuthProvider service={dependencies.auth} queryClient={client}>
         <ProjectsContext.Provider value={dependencies.projects}>
-          {children}
+          <TeacherOverviewContext.Provider value={dependencies.teacherOverview}>
+            <AssessmentContext.Provider value={dependencies.assessments}>
+              <RubricContext.Provider value={dependencies.rubrics}>
+                <StudentContext.Provider value={dependencies.students}>
+                  {children}
+                </StudentContext.Provider>
+              </RubricContext.Provider>
+            </AssessmentContext.Provider>
+          </TeacherOverviewContext.Provider>
           <Toaster richColors position="bottom-right" />
         </ProjectsContext.Provider>
       </AuthProvider>

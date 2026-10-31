@@ -14,12 +14,13 @@ export function createDemoSession(): AuthSessionService {
     async getAccessToken() {
       return undefined;
     },
-    async login() {
+    async login(options) {
+      const student = options?.profile === 'student';
       user = {
-        id: 'demo-teacher',
-        name: 'Andrea García',
-        email: 'docente@example.test',
-        roles: ['TEACHER'],
+        id: student ? 'demo-student' : 'demo-teacher',
+        name: student ? 'Alex Rivera' : 'Andrea García',
+        email: student ? 'estudiante@example.test' : 'docente@example.test',
+        roles: [student ? 'STUDENT' : 'TEACHER'],
       };
       notify();
     },

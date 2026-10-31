@@ -11,8 +11,8 @@ export function DashboardPage() {
       <p className="mt-3 text-muted-foreground">
         Cada proyecto es una oportunidad para aprender.
       </p>
-      <div className="mt-8 overflow-hidden rounded-2xl bg-[#142b26] p-8 text-white sm:p-12">
-        <ShieldCheck className="mb-6 text-[#b9e4bc]" size={32} />
+      <div className="mt-8 overflow-hidden rounded-2xl bg-sidebar p-8 text-white sm:p-12">
+        <ShieldCheck className="mb-6 text-sidebar-highlight" size={32} />
         <h2 className="max-w-xl text-3xl font-semibold leading-tight">
           Acompaña el proceso.
           <br />
@@ -22,10 +22,7 @@ export function DashboardPage() {
           Organiza los proyectos de tu curso y reúne evidencia del trabajo de
           tus equipos en un solo lugar.
         </p>
-        <Button
-          asChild
-          className="mt-8 bg-[#b9e4bc] text-[#142b26] hover:bg-[#d0efd2]"
-        >
+        <Button asChild className="mt-8">
           <Link to="/projects">
             <FolderKanban size={16} />
             Explorar proyectos

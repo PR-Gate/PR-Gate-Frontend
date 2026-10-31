@@ -5,6 +5,10 @@ import { ProjectsContext } from '@/features/projects/presentation/hooks/projects
 import { AuthContext } from '@/shared/services/auth/auth-context';
 import { createDependencies } from '@/app/di/container';
 import { createDemoSession } from '@/features/users/infrastructure/auth/demo-session.adapter';
+import { TeacherOverviewContext } from '@/features/metrics/presentation/hooks/use-teacher-overview';
+import { AssessmentContext } from '@/features/assessments/presentation/hooks/use-assessments';
+import { RubricContext } from '@/features/rubrics/presentation/hooks/use-rubrics';
+import { StudentContext } from '@/features/users/presentation/hooks/use-students';
 export function createTestWrapper() {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -32,7 +36,17 @@ export function createTestWrapper() {
             }}
           >
             <ProjectsContext.Provider value={dependencies.projects}>
-              {children}
+              <TeacherOverviewContext.Provider
+                value={dependencies.teacherOverview}
+              >
+                <AssessmentContext.Provider value={dependencies.assessments}>
+                  <RubricContext.Provider value={dependencies.rubrics}>
+                    <StudentContext.Provider value={dependencies.students}>
+                      {children}
+                    </StudentContext.Provider>
+                  </RubricContext.Provider>
+                </AssessmentContext.Provider>
+              </TeacherOverviewContext.Provider>
             </ProjectsContext.Provider>
           </AuthContext.Provider>
         </QueryClientProvider>

@@ -1,5 +1,7 @@
 # PR Gate Frontend
 
+Antes de implementar o modificar una sección, consultar el [contexto y acuerdos del proyecto](docs/project-context/README.md): arquitectura, endpoints simulados, integración futura con backend y conservación de funcionalidades existentes.
+
 Base ejecutable de la plataforma de orquestación pedagógica para proyectos universitarios. React consume microservicios REST mediante un API Gateway. La auditoría técnica determinista, la evaluación académica, los pipelines y la integración con LLM pertenecen al backend.
 
 ## Inicio rápido
@@ -14,7 +16,7 @@ npm run dev
 
 Si PowerShell bloquea `npm.ps1`, utiliza `npm.cmd`. Abre la URL de Vite (normalmente `http://localhost:5173`) y pulsa **Explorar demostración** para ingresar como docente. No requiere credenciales ni backend: MSW intercepta las solicitudes de Axios.
 
-La demostración permite listar, buscar, filtrar, cambiar entre tarjetas y tabla, consultar detalle y crear proyectos con validación. Los datos viven en memoria del worker y se reinician al recargar. Los repositorios y proyectos de ejemplo son ficticios. Las otras secciones indican su estado pendiente.
+La demostración permite listar, buscar, filtrar, cambiar entre tarjetas y tabla, consultar detalle y crear proyectos con validación. Incluye además el resumen docente con indicadores y reportes simulados. Los datos viven en memoria del worker y se reinician al recargar. Los repositorios y proyectos de ejemplo son ficticios. Las secciones aún no implementadas indican su estado pendiente.
 
 ## Comandos
 
@@ -33,6 +35,14 @@ La demostración permite listar, buscar, filtrar, cambiar entre tarjetas y tabla
 El build compila sin credenciales, pero el **arranque del bundle de producción exige OIDC configurado y mocks desactivados**. Un bundle compilado con `.env` de demostración muestra un error de configuración en producción. Configura `.env.production.local` antes de generar el artefacto para despliegue; utiliza `npm run dev` para la demo. El hosting debe redirigir las rutas SPA a `index.html`.
 
 ## Tecnologías
+
+La sección docente **Estudiantes** está disponible en `/teacher/students`: permite elegir curso, buscar, abrir contribuciones/evidencias y exportar la lista visible a CSV. Usa Axios y MSW a través de casos de uso y repositorio dentro de Users. Los indicadores son orientativos, nunca calificaciones calculadas en React. Consulta [la implementación y endpoints provisionales](docs/students.md).
+
+**Rúbricas** está disponible para Docente en `/teacher/rubrics`, y **Mi rúbrica** para Estudiante en `/my-rubric`. Incluye biblioteca, criterios/niveles, publicación y carga simuladas, y evidencia de resultados de solo lectura. Todas las operaciones consumen endpoints de MSW a través de casos de uso y repositorios; no usan una biblioteca local como sustituto del flujo HTTP. Consulta [la implementación y la migración futura](docs/rubrics.md).
+
+La sección **Tests y evaluaciones** está disponible para el rol Docente en `/teacher/evaluations`. Permite crear borradores, configurar preguntas y destinatarios, publicar/programar, revisar entregas y consultar resultados con datos de MSW. Los recordatorios son simulados y los cambios se reinician al recargar. Consulta [el funcionamiento y la integración futura](docs/assessments.md).
+
+El resumen docente está disponible en `/teacher/dashboard`: entra en demo como Docente y pulsa **Resumen**. Incluye cursos/periodos, KPIs, donut, actividad, tabla con búsqueda, muestra de estudiantes y exportación CSV. Todos los datos pasan por MSW; `GET /demo/teacher-overview` es un contrato provisional. GitHub y el backend real siguen pendientes. Consulta [el estado y contrato del dashboard](docs/teacher-dashboard-plan.md).
 
 React, TypeScript strict, Vite, React Router lazy, Tailwind CSS 4 y componentes locales con patrón shadcn/ui (Radix, CVA, `cn`, `components.json`), Lucide, TanStack Query, Zustand solo para sidebar, React Hook Form, Zod, Axios, oidc-client-ts, Vitest, Testing Library, MSW, ESLint, Prettier y dependency-cruiser. Versiones exactas en `package.json` y lockfile; utiliza `npm ci` en CI.
 
@@ -124,7 +134,7 @@ Configura `VITE_API_BASE_URL` como `/api` para mismo origen o la URL HTTPS del g
 
 POST recibe `name`, `description`, `course_name`, `repository_url`. El DTO devuelto añade `id`, `status` (`ACTIVE` o `ARCHIVED`), `member_count` y `updated_at` ISO. Confirma rutas, paginación, permisos y formatos antes de integrar: adapta API service, schema y mapper sin cambiar componentes.
 
-Los cinco contextos restantes no tienen contratos REST definidos. Sus API services y casos de uso se implementarán al acordar endpoints y DTOs; sus páginas no envían solicitudes ficticias. No se crean Application Services ni Domain Services cuando un caso de uso basta.
+Metrics implementa el resumen docente con el contrato provisional de MSW `/demo/teacher-overview`; las métricas específicas de proyecto y los otros contextos siguen pendientes de contratos REST reales. Sus API services se incorporarán al acordar endpoints y DTOs; las páginas iniciales no envían solicitudes ficticias. No se crean Application Services ni Domain Services cuando un caso de uso basta.
 
 ## Cognito / OIDC
 

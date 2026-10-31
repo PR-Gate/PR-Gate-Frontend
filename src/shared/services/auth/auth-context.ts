@@ -1,11 +1,11 @@
 import { createContext, useContext } from 'react';
-import type { SessionUser } from './auth-session.service';
+import type { LoginOptions, SessionUser } from './auth-session.service';
 
 export interface AuthState {
   user: SessionUser | null;
   loading: boolean;
   error: string | null;
-  login(): Promise<void>;
+  login(options?: LoginOptions): Promise<void>;
   logout(): Promise<void>;
 }
 export const AuthContext = createContext<AuthState | null>(null);

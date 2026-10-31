@@ -1,9 +1,16 @@
 import { Navigate, Outlet } from 'react-router';
 import { useAuth } from '@/shared/services/auth/auth-context';
-export function RoleGuard({ roles }: { roles: readonly string[] }) {
+import type { ReactNode } from 'react';
+export function RoleGuard({
+  roles,
+  children,
+}: {
+  roles: readonly string[];
+  children?: ReactNode;
+}) {
   const { user } = useAuth();
   return user?.roles.some((role) => roles.includes(role)) ? (
-    <Outlet />
+    (children ?? <Outlet />)
   ) : (
     <Navigate to="/unauthorized" replace />
   );

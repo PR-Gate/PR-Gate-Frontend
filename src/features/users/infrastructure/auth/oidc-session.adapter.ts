@@ -83,8 +83,10 @@ export function createOidcSession(config: OidcConfig): AuthSessionService {
       const user = await manager.getUser();
       return user && !user.expired ? user.access_token : undefined;
     },
-    async login() {
-      await manager.signinRedirect();
+    async login(options) {
+      await manager.signinRedirect(
+        options?.loginHint ? { login_hint: options.loginHint } : undefined,
+      );
     },
     async logout() {
       await manager.removeUser();

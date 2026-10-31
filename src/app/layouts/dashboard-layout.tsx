@@ -13,28 +13,62 @@ import {
   ShieldCheck,
   Sparkles,
   X,
+  ChartNoAxesColumnIncreasing,
+  ClipboardCheck,
+  Settings,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Users,
 } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { useAuth } from '@/shared/services/auth/auth-context';
 import { useUiStore } from '@/shared/stores/ui.store';
 import { Button } from '@/shared/components/ui/button';
-import { navigation } from '../config/routes.config';
+import { navigation, teacherNavigation } from '../config/routes.config';
 const icons = {
   dashboard: LayoutDashboard,
   projects: FolderKanban,
   feedback: MessageSquareText,
   practice: Sparkles,
   notifications: Bell,
+  courses: BookOpen,
+  rubrics: ClipboardCheck,
+  analytics: ChartNoAxesColumnIncreasing,
+  settings: Settings,
+  students: Users,
 };
 export function DashboardLayout({ demo }: { demo: boolean }) {
   const { user, logout } = useAuth();
-  const { sidebarOpen, toggleSidebar, closeSidebar } = useUiStore();
+  const {
+    sidebarOpen,
+    sidebarCollapsed,
+    toggleCollapsed,
+    toggleSidebar,
+    closeSidebar,
+  } = useUiStore();
+  const isTeacher = user?.roles.some((role) =>
+    ['TEACHER', 'ADMIN'].includes(role),
+  );
+  const items = isTeacher
+    ? teacherNavigation.filter(
+        (item) =>
+          ![
+            '/teacher/evaluations',
+            '/teacher/rubrics',
+            '/teacher/students',
+          ].includes(item.path) || user?.roles.includes('TEACHER'),
+      )
+    : navigation.filter(
+        (item) => item.path !== '/my-rubric' || user?.roles.includes('STUDENT'),
+      );
   const location = useLocation();
   const current =
-    navigation.find((item) => location.pathname.startsWith(item.path))?.label ??
-    'Espacio académico';
+    items.find((item) => location.pathname === item.path.split('#')[0])
+      ?.label ?? 'Espacio académico';
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className={`min-h-screen bg-background ${sidebarCollapsed ? 'dashboard-sidebar-collapsed' : ''}`}
+    >
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:p-3"
@@ -49,60 +83,64 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-[#294039] bg-[#142b26] text-white transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`dashboard-sidebar fixed inset-y-0 left-0 z-30 flex w-64 flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar text-white transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <Link to="/dashboard" className="flex h-20 items-center gap-3 px-7">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-[#b9e4bc] text-[#142b26]">
-            <ShieldCheck size={23} />
+        <Link
+          to={isTeacher ? '/teacher/dashboard' : '/dashboard'}
+          aria-label="Orquestador académico · Inicio"
+          className="dashboard-brand flex h-20 shrink-0 items-center gap-3 px-7"
+        >
+          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <ChartNoAxesColumnIncreasing size={23} />
           </div>
-          <span className="text-xl font-bold tracking-tight">
-            PR Gate<span className="ml-1 text-[#b9e4bc]">.</span>
+          <span className="dashboard-sidebar-label text-sm font-bold">
+            Orquestador
+            <span className="mt-1 block text-[8px] font-normal tracking-[.2em] text-sidebar-highlight">
+              ACADÉMICO
+            </span>
           </span>
         </Link>
-        <div className="mx-4 mb-8 flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3">
-          <GraduationCap size={20} className="text-[#b9e4bc]" />
-          <div className="flex-1">
-            <p className="text-sm font-medium">Espacio académico</p>
-            <p className="mt-0.5 text-[11px] text-white/45">
-              Orquestación pedagógica
-            </p>
+        {!isTeacher && (
+          <div className="dashboard-sidebar-expanded mx-4 mb-8 flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3">
+            <GraduationCap size={20} className="text-sidebar-highlight" />
+            <div className="flex-1">
+              <p className="text-sm font-medium">Espacio académico</p>
+              <p className="mt-0.5 text-[11px] text-white/45">
+                Orquestación pedagógica
+              </p>
+            </div>
+            <ChevronsUpDown size={14} className="text-white/40" />
           </div>
-          <ChevronsUpDown size={14} className="text-white/40" />
-        </div>
-        <p className="mb-3 px-7 text-[10px] font-semibold tracking-[.15em] text-white/35">
-          PRINCIPAL
+        )}
+        <p className="dashboard-sidebar-label mb-3 px-7 text-[10px] font-semibold tracking-[.15em] text-white/55">
+          {isTeacher ? 'ESPACIO DOCENTE' : 'PRINCIPAL'}
         </p>
         <nav aria-label="Navegación principal" className="space-y-1 px-3">
-          {navigation.map((item) => {
+          {items.map((item) => {
             const Icon = icons[item.icon];
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
+                title={item.label}
+                aria-label={item.label}
+                aria-current={item.path.includes('#') ? false : undefined}
                 onClick={closeSidebar}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors ${isActive ? 'bg-[#b9e4bc] font-semibold text-[#142b26]' : 'text-white/65 hover:bg-white/5 hover:text-white'}`
+                  `dashboard-nav-link flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors ${isActive && !item.path.includes('#') ? 'bg-sidebar-accent font-semibold text-white' : 'text-white/65 hover:bg-white/5 hover:text-white'}`
                 }
               >
                 <Icon size={18} />
-                {item.label}
+                <span className="dashboard-sidebar-label">{item.label}</span>
               </NavLink>
             );
           })}
         </nav>
-        {user?.roles.some((role) => ['TEACHER', 'ADMIN'].includes(role)) && (
-          <div className="mt-8 px-7">
+        {user?.roles.includes('ADMIN') && (
+          <div className="dashboard-sidebar-expanded mt-8 px-7">
             <p className="mb-4 text-[10px] font-semibold tracking-[.15em] text-white/35">
               GESTIÓN ACADÉMICA
             </p>
-            <Link
-              to="/teacher/dashboard"
-              onClick={closeSidebar}
-              className="flex items-center gap-3 text-sm text-white/65"
-            >
-              <BookOpen size={18} />
-              Panel docente
-            </Link>
             {user.roles.includes('ADMIN') && (
               <Link
                 to="/admin/dashboard"
@@ -116,18 +154,33 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
           </div>
         )}
         <div className="mt-auto px-5 pb-5">
-          <div className="mb-5 rounded-lg border border-white/10 p-4">
-            <CircleHelp size={18} className="mb-2 text-[#b9e4bc]" />
-            <p className="text-xs font-medium">El código también enseña.</p>
-            <p className="mt-2 text-xs leading-relaxed text-white/45">
-              Conecta el trabajo de tu equipo con evidencia de aprendizaje.
-            </p>
-          </div>
+          <button
+            className="dashboard-collapse-button mb-5 hidden w-full items-center gap-3 border-t border-white/10 pt-4 text-xs text-white/65 lg:flex"
+            onClick={toggleCollapsed}
+            aria-label={sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'}
+            aria-expanded={!sidebarCollapsed}
+          >
+            {sidebarCollapsed ? (
+              <PanelLeftOpen size={17} />
+            ) : (
+              <PanelLeftClose size={17} />
+            )}
+            <span className="dashboard-sidebar-label">Contraer menú</span>
+          </button>
+          {!isTeacher && (
+            <div className="dashboard-sidebar-expanded mb-5 rounded-lg border border-white/10 p-4">
+              <CircleHelp size={18} className="mb-2 text-sidebar-highlight" />
+              <p className="text-xs font-medium">El código también enseña.</p>
+              <p className="mt-2 text-xs leading-relaxed text-white/45">
+                Conecta el trabajo de tu equipo con evidencia de aprendizaje.
+              </p>
+            </div>
+          )}
           <div className="flex items-center gap-3 border-t border-white/10 pt-5">
             <Link
               to="/profile"
               aria-label="Ver perfil"
-              className="flex size-9 items-center justify-center rounded-full bg-[#d8e8dc] text-xs font-semibold text-[#142b26]"
+              className="flex size-9 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary"
             >
               {user?.name
                 .split(' ')
@@ -135,7 +188,7 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
                 .slice(0, 2)
                 .join('')}
             </Link>
-            <div className="min-w-0 flex-1">
+            <div className="dashboard-sidebar-label min-w-0 flex-1">
               <p className="truncate text-xs font-medium">{user?.name}</p>
               <p className="mt-1 text-[10px] text-white/40">
                 {user?.roles.join(' · ')}
@@ -153,7 +206,7 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
           </div>
         </div>
       </aside>
-      <div className="lg:pl-64">
+      <div className="dashboard-main lg:pl-64">
         <header className="flex h-20 items-center justify-between gap-3 border-b border-border bg-white px-5 sm:px-9">
           <div className="flex items-center gap-3">
             <Button

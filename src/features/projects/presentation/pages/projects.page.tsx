@@ -93,7 +93,7 @@ export default function ProjectsPage() {
       </div>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <FolderKanban size={18} className="text-emerald-800" />
+          <FolderKanban size={18} className="text-primary" />
           <h2 className="text-base font-semibold">Todos los proyectos</h2>
           <span className="rounded-md bg-slate-200/60 px-2 py-0.5 text-xs">
             {query.isSuccess ? filtered.length : '—'}

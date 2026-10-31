@@ -8,11 +8,17 @@ import { RouteError } from '@/shared/components/feedback/route-error';
 import { ModulePlaceholder } from '@/shared/components/common/module-placeholder';
 import { adminRoutes, teacherRoutes } from '../config/routes.config';
 import { DashboardPage, NotFoundPage, UnauthorizedPage } from './static-pages';
+import { createStudentRoutes } from './student.routes';
 
 export function createAppRouter(demo: boolean) {
   return createBrowserRouter([
     {
       element: <MainLayout />,
+      hydrateFallbackElement: (
+        <p role="status" className="p-10">
+          Cargando espacio académico…
+        </p>
+      ),
       errorElement: <RouteError />,
       children: [
         {
@@ -103,16 +109,101 @@ export function createAppRouter(demo: boolean) {
                 },
                 {
                   element: <RoleGuard roles={['TEACHER', 'ADMIN']} />,
-                  children: teacherRoutes.map((route) => ({
-                    path: route.path,
-                    element: (
-                      <ModulePlaceholder
-                        title={route.title}
-                        description="Herramientas docentes para acompañar y evaluar el aprendizaje basado en proyectos."
-                      />
+                  children: [
+                    ...teacherRoutes.map((route) =>
+                      route.path === '/teacher/dashboard'
+                        ? {
+                            path: route.path,
+                            lazy: async () => ({
+                              Component: demo
+                                ? (await import('@/features/metrics'))
+                                    .TeacherDashboardPage
+                                : () => (
+                                    <ModulePlaceholder
+                                      title="Resumen docente"
+                                      description="El resumen está disponible en la demostración local. Su conexión con datos reales se habilitará cuando el contrato del backend esté definido."
+                                    />
+                                  ),
+                            }),
+                          }
+                        : route.path === '/teacher/rubrics'
+                          ? {
+                              path: route.path,
+                              lazy: async () => {
+                                const { RubricsPage } =
+                                  await import('@/features/rubrics');
+                                return {
+                                  Component: () => (
+                                    <RoleGuard roles={['TEACHER']}>
+                                      {demo ? (
+                                        <RubricsPage />
+                                      ) : (
+                                        <ModulePlaceholder
+                                          title="Rúbricas"
+                                          description="La conexión real de rúbricas se habilitará cuando los endpoints del backend estén definidos."
+                                        />
+                                      )}
+                                    </RoleGuard>
+                                  ),
+                                };
+                              },
+                            }
+                          : route.path === '/teacher/evaluations'
+                            ? {
+                                path: route.path,
+                                lazy: async () => {
+                                  const { AssessmentsPage } =
+                                    await import('@/features/assessments');
+                                  return {
+                                    Component: () => (
+                                      <RoleGuard roles={['TEACHER']}>
+                                        {demo ? (
+                                          <AssessmentsPage />
+                                        ) : (
+                                          <ModulePlaceholder
+                                            title="Tests y evaluaciones"
+                                            description="Esta sección usa datos de demostración. La conexión real se habilitará cuando el backend y sus contratos estén definidos."
+                                          />
+                                        )}
+                                      </RoleGuard>
+                                    ),
+                                  };
+                                },
+                              }
+                            : {
+                                path: route.path,
+                                element: (
+                                  <ModulePlaceholder
+                                    title={route.title}
+                                    description="Herramientas docentes para acompañar y evaluar el aprendizaje basado en proyectos."
+                                  />
+                                ),
+                              },
                     ),
-                  })),
+                    {
+                      path: '/teacher/evaluations/:testId',
+                      lazy: async () => {
+                        const { AssessmentDetailPage } =
+                          await import('@/features/assessments');
+                        return {
+                          Component: () => (
+                            <RoleGuard roles={['TEACHER']}>
+                              {demo ? (
+                                <AssessmentDetailPage />
+                              ) : (
+                                <ModulePlaceholder
+                                  title="Tests y evaluaciones"
+                                  description="La integración con datos reales sigue pendiente del backend."
+                                />
+                              )}
+                            </RoleGuard>
+                          ),
+                        };
+                      },
+                    },
+                  ],
                 },
+                ...createStudentRoutes(demo),
                 {
                   element: <RoleGuard roles={['ADMIN']} />,
                   children: adminRoutes.map((route) => ({
@@ -124,6 +215,27 @@ export function createAppRouter(demo: boolean) {
                       />
                     ),
                   })),
+                },
+                {
+                  path: '/my-rubric',
+                  lazy: async () => {
+                    const { StudentRubricPage } =
+                      await import('@/features/rubrics');
+                    return {
+                      Component: () => (
+                        <RoleGuard roles={['STUDENT']}>
+                          {demo ? (
+                            <StudentRubricPage />
+                          ) : (
+                            <ModulePlaceholder
+                              title="Mi rúbrica"
+                              description="La consulta de la rúbrica asignada se habilitará al integrar el backend."
+                            />
+                          )}
+                        </RoleGuard>
+                      ),
+                    };
+                  },
                 },
               ],
             },

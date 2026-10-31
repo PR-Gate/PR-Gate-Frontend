@@ -3,8 +3,14 @@ PR-Gate-Frontend/
 |   \-- workflows/
 |       \-- quality.yml
 +-- docs/
+|   +-- project-context/
+|   |   \-- README.md
 |   +-- architecture.md
-|   \-- file-tree.txt
+|   +-- assessments.md
+|   +-- file-tree.txt
+|   +-- rubrics.md
+|   +-- students.md
+|   \-- teacher-dashboard-plan.md
 +-- public/
 |   \-- mockServiceWorker.js
 +-- src/
@@ -27,10 +33,16 @@ PR-Gate-Frontend/
 |   |   |   \-- query-provider.tsx
 |   |   +-- router/
 |   |   |   +-- app-router.tsx
+|   |   |   +-- assessments.test.tsx
 |   |   |   +-- guards.test.tsx
+|   |   |   +-- login-flow.test.tsx
 |   |   |   +-- protected-route.tsx
 |   |   |   +-- role-guard.tsx
-|   |   |   \-- static-pages.tsx
+|   |   |   +-- rubrics.test.tsx
+|   |   |   +-- static-pages.tsx
+|   |   |   +-- student.routes.tsx
+|   |   |   +-- students.test.tsx
+|   |   |   \-- teacher-dashboard.test.tsx
 |   |   \-- app.tsx
 |   +-- features/
 |   |   +-- ai-practice/
@@ -43,6 +55,38 @@ PR-Gate-Frontend/
 |   |   |   +-- presentation/
 |   |   |   |   \-- pages/
 |   |   |   |       \-- ai-practice.page.tsx
+|   |   |   \-- index.ts
+|   |   +-- assessments/
+|   |   |   +-- application/
+|   |   |   |   +-- assessment.use-cases.test.ts
+|   |   |   |   \-- assessment.use-cases.ts
+|   |   |   +-- domain/
+|   |   |   |   +-- assessment.repository.ts
+|   |   |   |   \-- assessment.ts
+|   |   |   +-- infrastructure/
+|   |   |   |   +-- assessment-api.service.test.ts
+|   |   |   |   +-- assessment-api.service.ts
+|   |   |   |   +-- assessment.dto.ts
+|   |   |   |   +-- assessment.mapper.test.ts
+|   |   |   |   +-- assessment.mapper.ts
+|   |   |   |   \-- assessment.repository.impl.ts
+|   |   |   +-- presentation/
+|   |   |   |   +-- components/
+|   |   |   |   |   +-- question-editor.tsx
+|   |   |   |   |   +-- response-review.tsx
+|   |   |   |   |   +-- test-status.tsx
+|   |   |   |   |   \-- test-wizard.tsx
+|   |   |   |   +-- hooks/
+|   |   |   |   |   +-- use-assessments.test.tsx
+|   |   |   |   |   \-- use-assessments.ts
+|   |   |   |   +-- pages/
+|   |   |   |   |   +-- assessment-detail.page.tsx
+|   |   |   |   |   \-- assessments.page.tsx
+|   |   |   |   +-- schemas/
+|   |   |   |   |   \-- test.schema.ts
+|   |   |   |   +-- styles/
+|   |   |   |   |   \-- assessments.css
+|   |   |   |   \-- test-labels.ts
 |   |   |   \-- index.ts
 |   |   +-- cicd/
 |   |   |   +-- application/
@@ -57,14 +101,47 @@ PR-Gate-Frontend/
 |   |   |   \-- index.ts
 |   |   +-- metrics/
 |   |   |   +-- application/
+|   |   |   |   +-- use-cases/
+|   |   |   |   |   +-- get-teacher-overview.use-case.test.ts
+|   |   |   |   |   \-- get-teacher-overview.use-case.ts
 |   |   |   |   \-- README.md
 |   |   |   +-- domain/
+|   |   |   |   +-- entities/
+|   |   |   |   |   \-- teacher-overview.entity.ts
+|   |   |   |   +-- repositories/
+|   |   |   |   |   \-- teacher-overview.repository.ts
 |   |   |   |   \-- README.md
 |   |   |   +-- infrastructure/
+|   |   |   |   +-- dto/
+|   |   |   |   |   \-- teacher-overview-response.dto.ts
+|   |   |   |   +-- mappers/
+|   |   |   |   |   +-- teacher-overview.mapper.test.ts
+|   |   |   |   |   \-- teacher-overview.mapper.ts
+|   |   |   |   +-- repositories/
+|   |   |   |   |   \-- teacher-overview.repository.impl.ts
+|   |   |   |   +-- services/
+|   |   |   |   |   +-- metrics-api.service.test.ts
+|   |   |   |   |   \-- metrics-api.service.ts
 |   |   |   |   \-- README.md
 |   |   |   +-- presentation/
-|   |   |   |   \-- pages/
-|   |   |   |       \-- metrics.page.tsx
+|   |   |   |   +-- components/
+|   |   |   |   |   +-- project-status-chart.tsx
+|   |   |   |   |   +-- projects-attention-table.tsx
+|   |   |   |   |   +-- recent-activity-list.tsx
+|   |   |   |   |   +-- teacher-progress-strip.tsx
+|   |   |   |   |   \-- teacher-summary-cards.tsx
+|   |   |   |   +-- hooks/
+|   |   |   |   |   +-- use-teacher-overview.test.tsx
+|   |   |   |   |   \-- use-teacher-overview.ts
+|   |   |   |   +-- pages/
+|   |   |   |   |   +-- metrics.page.tsx
+|   |   |   |   |   \-- teacher-dashboard.page.tsx
+|   |   |   |   +-- styles/
+|   |   |   |   |   \-- teacher-dashboard.css
+|   |   |   |   \-- utils/
+|   |   |   |       +-- export-overview.test.ts
+|   |   |   |       +-- export-overview.ts
+|   |   |   |       \-- overview-format.ts
 |   |   |   \-- index.ts
 |   |   +-- notifications/
 |   |   |   +-- application/
@@ -118,22 +195,104 @@ PR-Gate-Frontend/
 |   |   |   |   \-- schemas/
 |   |   |   |       \-- project.schema.ts
 |   |   |   \-- index.ts
+|   |   +-- rubrics/
+|   |   |   +-- application/
+|   |   |   |   +-- rubric.use-cases.test.ts
+|   |   |   |   \-- rubric.use-cases.ts
+|   |   |   +-- domain/
+|   |   |   |   +-- rubric.repository.ts
+|   |   |   |   +-- rubric.test.ts
+|   |   |   |   \-- rubric.ts
+|   |   |   +-- infrastructure/
+|   |   |   |   +-- rubric-api.service.test.ts
+|   |   |   |   +-- rubric-api.service.ts
+|   |   |   |   +-- rubric.dto.ts
+|   |   |   |   +-- rubric.mapper.ts
+|   |   |   |   \-- rubric.repository.impl.ts
+|   |   |   +-- presentation/
+|   |   |   |   +-- components/
+|   |   |   |   |   +-- achievement-level-editor.tsx
+|   |   |   |   |   +-- evidence-selects.tsx
+|   |   |   |   |   +-- evidence-trace.tsx
+|   |   |   |   |   +-- publish-rubric-modal.tsx
+|   |   |   |   |   +-- rubric-card.tsx
+|   |   |   |   |   +-- rubric-criterion-editor.tsx
+|   |   |   |   |   +-- rubric-editor.tsx
+|   |   |   |   |   +-- rubric-library.tsx
+|   |   |   |   |   +-- rubric-status-badge.tsx
+|   |   |   |   |   +-- rubric-upload-modal.tsx
+|   |   |   |   |   +-- student-criterion-detail.tsx
+|   |   |   |   |   +-- student-criterion-list.tsx
+|   |   |   |   |   +-- student-rubric-summary.tsx
+|   |   |   |   |   \-- total-score-summary.tsx
+|   |   |   |   +-- hooks/
+|   |   |   |   |   +-- use-rubrics.test.tsx
+|   |   |   |   |   \-- use-rubrics.ts
+|   |   |   |   +-- pages/
+|   |   |   |   |   +-- rubrics.page.tsx
+|   |   |   |   |   \-- student-rubric.page.tsx
+|   |   |   |   +-- styles/
+|   |   |   |   |   \-- rubrics.css
+|   |   |   |   +-- file-validation.test.ts
+|   |   |   |   +-- file-validation.ts
+|   |   |   |   \-- rubric-labels.ts
+|   |   |   \-- index.ts
 |   |   \-- users/
 |   |       +-- application/
+|   |       |   +-- use-cases/
+|   |       |   |   +-- get-course-students.use-case.ts
+|   |       |   |   +-- get-student-contribution.use-case.ts
+|   |       |   |   \-- student.use-cases.test.ts
 |   |       |   \-- README.md
 |   |       +-- domain/
 |   |       |   +-- entities/
+|   |       |   |   +-- student.entity.ts
 |   |       |   |   \-- user.entity.ts
+|   |       |   +-- repositories/
+|   |       |   |   \-- student.repository.ts
 |   |       |   \-- README.md
 |   |       +-- infrastructure/
 |   |       |   +-- auth/
+|   |       |   |   +-- demo-session.adapter.test.ts
 |   |       |   |   +-- demo-session.adapter.ts
+|   |       |   |   +-- oidc-session.adapter.test.ts
 |   |       |   |   \-- oidc-session.adapter.ts
+|   |       |   +-- dto/
+|   |       |   |   \-- student-response.dto.ts
+|   |       |   +-- mappers/
+|   |       |   |   \-- student.mapper.ts
+|   |       |   +-- repositories/
+|   |       |   |   \-- student.repository.impl.ts
+|   |       |   +-- services/
+|   |       |   |   +-- student-api.service.test.ts
+|   |       |   |   \-- student-api.service.ts
 |   |       |   \-- README.md
 |   |       +-- presentation/
-|   |       |   \-- pages/
-|   |       |       +-- login.page.tsx
-|   |       |       \-- profile.page.tsx
+|   |       |   +-- components/
+|   |       |   |   +-- login-brand-panel.tsx
+|   |       |   |   +-- login-form.tsx
+|   |       |   |   +-- login-pipeline-steps.tsx
+|   |       |   |   +-- login-role-selector.tsx
+|   |       |   |   +-- student-course-selector.tsx
+|   |       |   |   +-- student-status-badge.tsx
+|   |       |   |   \-- students-table.tsx
+|   |       |   +-- hooks/
+|   |       |   |   +-- use-login.ts
+|   |       |   |   +-- use-students.test.tsx
+|   |       |   |   \-- use-students.ts
+|   |       |   +-- pages/
+|   |       |   |   +-- login.page.tsx
+|   |       |   |   +-- profile.page.tsx
+|   |       |   |   +-- student-contribution.page.tsx
+|   |       |   |   \-- students.page.tsx
+|   |       |   +-- schemas/
+|   |       |   |   \-- login.schema.ts
+|   |       |   +-- styles/
+|   |       |   |   +-- login.css
+|   |       |   |   \-- students.css
+|   |       |   \-- utils/
+|   |       |       +-- export-students.test.ts
+|   |       |       \-- export-students.ts
 |   |       \-- index.ts
 |   +-- shared/
 |   |   +-- components/
@@ -149,7 +308,9 @@ PR-Gate-Frontend/
 |   |   +-- services/
 |   |   |   +-- auth/
 |   |   |   |   +-- auth-context.ts
-|   |   |   |   \-- auth-session.service.ts
+|   |   |   |   +-- auth-session.service.ts
+|   |   |   |   +-- login-navigation.test.ts
+|   |   |   |   \-- login-navigation.ts
 |   |   |   \-- http/
 |   |   |       +-- axios.config.ts
 |   |   |       +-- http-client.ts
@@ -163,10 +324,18 @@ PR-Gate-Frontend/
 |   |       \-- cn.ts
 |   +-- testing/
 |   |   +-- mocks/
+|   |   |   +-- assessment.fixtures.ts
+|   |   |   +-- assessment.handlers.ts
 |   |   |   +-- browser.ts
 |   |   |   +-- fixtures.ts
 |   |   |   +-- handlers.ts
-|   |   |   \-- server.ts
+|   |   |   +-- rubric.fixtures.ts
+|   |   |   +-- rubric.handlers.ts
+|   |   |   +-- server.ts
+|   |   |   +-- student.fixtures.ts
+|   |   |   +-- student.handlers.ts
+|   |   |   +-- teacher-overview.fixtures.ts
+|   |   |   \-- teacher-overview.handlers.ts
 |   |   +-- setup.ts
 |   |   \-- test-providers.tsx
 |   +-- main.tsx

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { AuthContext } from '@/shared/services/auth/auth-context';
 import type {
   AuthSessionService,
+  LoginOptions,
   SessionUser,
 } from '@/shared/services/auth/auth-session.service';
 import type { QueryClient } from '@tanstack/react-query';
@@ -44,18 +45,21 @@ export function AuthProvider({
       unsubscribe();
     };
   }, [service, queryClient]);
-  const login = useCallback(async () => {
-    try {
-      setState((s) => ({ ...s, error: null }));
-      await service.login();
-    } catch {
-      setState((s) => ({
-        ...s,
-        error:
-          'No se pudo iniciar sesión. Verifica la configuración del proveedor.',
-      }));
-    }
-  }, [service]);
+  const login = useCallback(
+    async (options?: LoginOptions) => {
+      try {
+        setState((s) => ({ ...s, error: null }));
+        await service.login(options);
+      } catch {
+        setState((s) => ({
+          ...s,
+          error:
+            'No se pudo iniciar sesión. Verifica la configuración del proveedor.',
+        }));
+      }
+    },
+    [service],
+  );
   const logout = useCallback(async () => {
     queryClient.clear();
     try {

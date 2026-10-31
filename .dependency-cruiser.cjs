@@ -5,6 +5,8 @@ const features = [
   'metrics',
   'ai-practice',
   'notifications',
+  'assessments',
+  'rubrics',
 ];
 module.exports = {
   forbidden: [
