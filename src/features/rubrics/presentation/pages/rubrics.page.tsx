@@ -123,32 +123,6 @@ export default function RubricsPage() {
         Demostración · Datos simulados mediante MSW. Los cambios se reinician al
         recargar.
       </p>
-      <div className="rubric-start-cards">
-        <article>
-          <Plus size={22} />
-          <h2>Crear una rúbrica</h2>
-          <p>Define cada criterio, su descripción y cuántos puntos vale.</p>
-          <Button
-            variant="outline"
-            disabled={!query.data}
-            onClick={() => setEditing(null)}
-          >
-            Empezar desde cero
-          </Button>
-        </article>
-        <article>
-          <FileUp size={22} />
-          <h2>Subir una rúbrica</h2>
-          <p>Importa un archivo PDF, Word o Excel que ya tengas.</p>
-          <Button variant="outline" onClick={() => setUpload(true)}>
-            Seleccionar archivo
-          </Button>
-        </article>
-      </div>
-      <div className="rubric-library-heading">
-        <h2>Mis rúbricas</h2>
-        <p>Rúbricas creadas o importadas para tus cursos.</p>
-      </div>
       <div className="rubric-filters">
         <label className="rubric-search">
           <Search size={16} aria-hidden="true" />

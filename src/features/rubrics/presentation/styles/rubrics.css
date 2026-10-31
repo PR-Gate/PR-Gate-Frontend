@@ -31,42 +31,12 @@
   border-radius: 8px;
   margin-bottom: 24px;
 }
-.rubric-start-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-bottom: 32px;
-}
-.rubric-start-cards article,
 .rubric-card {
   padding: 24px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: white;
   box-shadow: 0 2px 5px #1a284508;
-}
-.rubric-start-cards h2 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-top: 15px;
-}
-.rubric-start-cards p {
-  color: var(--muted-foreground);
-  font-size: 13px;
-  margin-block: 9px 18px;
-  line-height: 1.7;
-}
-.rubric-start-cards svg {
-  color: var(--primary);
-}
-.rubric-library-heading h2 {
-  font-size: 20px;
-  font-weight: 600;
-}
-.rubric-library-heading p {
-  color: var(--muted-foreground);
-  font-size: 13px;
-  margin-top: 7px;
 }
 .rubric-filters {
   display: flex;
@@ -575,7 +545,6 @@
   }
 }
 @media (max-width: 600px) {
-  .rubric-start-cards,
   .rubric-two-columns {
     grid-template-columns: 1fr;
   }

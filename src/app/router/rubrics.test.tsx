@@ -234,7 +234,7 @@ it('simulates metadata-only uploads and opens example criteria for review', asyn
   const readBuffer = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer');
   await openRubrics();
   await libraryReady();
-  await user.click(screen.getByRole('button', { name: 'Seleccionar archivo' }));
+  await user.click(screen.getByRole('button', { name: 'Subir rúbrica' }));
   await user.upload(
     screen.getByLabelText('Selecciona o arrastra un archivo'),
     new File(['sample'], 'Institucional.pdf', { type: 'application/pdf' }),
