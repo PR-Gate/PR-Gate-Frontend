@@ -9,6 +9,7 @@ import { ModulePlaceholder } from '@/shared/components/common/module-placeholder
 import { adminRoutes, teacherRoutes } from '../config/routes.config';
 import { DashboardPage, NotFoundPage, UnauthorizedPage } from './static-pages';
 import { createStudentRoutes } from './student.routes';
+import RepositoryProjectsPage from '@/features/projects/presentation/pages/repository-projects.page';
 
 export function createAppRouter(demo: boolean) {
   return createBrowserRouter([
@@ -25,6 +26,14 @@ export function createAppRouter(demo: boolean) {
           element: <AuthLayout />,
           children: [
             {
+              path: '/register',
+              lazy: async () => ({
+                Component: (
+                  await import('@/features/users/presentation/pages/register.page')
+                ).default,
+              }),
+            },
+            {
               path: '/login',
               lazy: async () => {
                 const { default: Login } =
@@ -39,6 +48,14 @@ export function createAppRouter(demo: boolean) {
           element: <ProtectedRoute />,
           children: [
             {
+              path: '/account',
+              lazy: async () => {
+                const { default: AccountPage } =
+                  await import('@/features/users/presentation/pages/account.page');
+                return { Component: () => <AccountPage demo={demo} /> };
+              },
+            },
+            {
               element: <DashboardLayout demo={demo} />,
               children: [
                 { index: true, element: <Navigate to="/dashboard" replace /> },
@@ -46,17 +63,30 @@ export function createAppRouter(demo: boolean) {
                 {
                   path: '/projects',
                   lazy: async () => ({
-                    Component: (
-                      await import('@/features/projects/presentation/pages/projects.page')
-                    ).default,
+                    Component: demo
+                      ? (
+                          await import('@/features/projects/presentation/pages/projects.page')
+                        ).default
+                      : () => (
+                          <RoleGuard roles={['STUDENT', 'TEACHER']}>
+                            <RepositoryProjectsPage />
+                          </RoleGuard>
+                        ),
                   }),
                 },
                 {
                   path: '/projects/:projectId',
                   lazy: async () => ({
-                    Component: (
-                      await import('@/features/projects/presentation/pages/project-detail.page')
-                    ).default,
+                    Component: demo
+                      ? (
+                          await import('@/features/projects/presentation/pages/project-detail.page')
+                        ).default
+                      : () => (
+                          <ModulePlaceholder
+                            title="Detalle del proyecto"
+                            description="La consulta del proyecto está pendiente de conectar el servicio local de proyectos."
+                          />
+                        ),
                   }),
                 },
                 {
@@ -101,11 +131,11 @@ export function createAppRouter(demo: boolean) {
                 },
                 {
                   path: '/profile',
-                  lazy: async () => ({
-                    Component: (
-                      await import('@/features/users/presentation/pages/profile.page')
-                    ).default,
-                  }),
+                  lazy: async () => {
+                    const { default: ProfilePage } =
+                      await import('@/features/users/presentation/pages/profile.page');
+                    return { Component: () => <ProfilePage demo={demo} /> };
+                  },
                 },
                 {
                   element: <RoleGuard roles={['TEACHER', 'ADMIN']} />,

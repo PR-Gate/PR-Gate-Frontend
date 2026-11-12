@@ -9,6 +9,8 @@ import { TeacherOverviewContext } from '@/features/metrics/presentation/hooks/us
 import { AssessmentContext } from '@/features/assessments/presentation/hooks/use-assessments';
 import { RubricContext } from '@/features/rubrics/presentation/hooks/use-rubrics';
 import { StudentContext } from '@/features/users/presentation/hooks/use-students';
+import { GitHubLinkContext } from '@/features/users/presentation/hooks/use-github-link';
+import { RepositoryProjectsContext } from '@/features/projects/presentation/hooks/use-repository-projects';
 export function AppProviders({
   dependencies,
   children,
@@ -25,7 +27,13 @@ export function AppProviders({
             <AssessmentContext.Provider value={dependencies.assessments}>
               <RubricContext.Provider value={dependencies.rubrics}>
                 <StudentContext.Provider value={dependencies.students}>
-                  {children}
+                  <GitHubLinkContext.Provider value={dependencies.github}>
+                    <RepositoryProjectsContext.Provider
+                      value={dependencies.repositoryProjects}
+                    >
+                      {children}
+                    </RepositoryProjectsContext.Provider>
+                  </GitHubLinkContext.Provider>
                 </StudentContext.Provider>
               </RubricContext.Provider>
             </AssessmentContext.Provider>

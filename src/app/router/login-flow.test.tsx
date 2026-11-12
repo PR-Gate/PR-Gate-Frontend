@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -8,6 +8,7 @@ import { createDemoSession } from '@/features/users/infrastructure/auth/demo-ses
 import type { AuthSessionService } from '@/shared/services/auth/auth-session.service';
 import { saveLoginDestination } from '@/shared/services/auth/login-navigation';
 import LoginPage from '@/features/users/presentation/pages/login.page';
+import RegisterPage from '@/features/users/presentation/pages/register.page';
 import ProjectsPage from '@/features/projects/presentation/pages/projects.page';
 import ProjectDetailPage from '@/features/projects/presentation/pages/project-detail.page';
 import { AuthLayout } from '../layouts/auth-layout';
@@ -36,7 +37,10 @@ function renderLogin({
     [
       {
         element: <AuthLayout />,
-        children: [{ path: '/login', element: <LoginPage demo={demo} /> }],
+        children: [
+          { path: '/login', element: <LoginPage demo={demo} /> },
+          { path: '/register', element: <RegisterPage /> },
+        ],
       },
       { path: '/unauthorized', element: <p>Acceso denegado</p> },
       {
@@ -114,45 +118,41 @@ it('opens Projects as a student and denies teacher routes', async () => {
   expect(await screen.findByText('Acceso denegado')).toBeInTheDocument();
 });
 
-it('validates the optional email and forwards it to the existing login port', async () => {
+it('offers teacher or student registration before opening the identity provider', async () => {
   const user = userEvent.setup();
-  const service = createDemoSession();
-  const login = vi.spyOn(service, 'login');
-  renderLogin({ service, demo: false });
-  await screen.findByRole('button', { name: 'Iniciar sesión' });
-  await user.type(screen.getByLabelText(/Correo institucional/), 'invalid');
-  await user.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
-  expect(await screen.findByRole('alert')).toHaveTextContent(
-    'Escribe un correo electrónico válido',
-  );
+  const login = vi.fn().mockResolvedValue(undefined);
+  renderLogin({
+    service: { ...createDemoSession(), registrationEnabled: true, login },
+    demo: false,
+  });
+  await user.click(await screen.findByRole('button', { name: 'Crear cuenta' }));
+  expect(screen.getByRole('radio', { name: 'Estudiante' })).toBeChecked();
+  await user.click(screen.getByRole('radio', { name: 'Docente' }));
   expect(login).not.toHaveBeenCalled();
-  await user.clear(screen.getByLabelText(/Correo institucional/));
-  await user.type(
-    screen.getByLabelText(/Correo institucional/),
-    'docente@universidad.edu',
+  await user.click(
+    screen.getByRole('button', { name: 'Continuar con el registro' }),
   );
-  await user.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
-  await waitFor(() =>
-    expect(login).toHaveBeenCalledWith({
-      profile: 'teacher',
-      loginHint: 'docente@universidad.edu',
-    }),
-  );
+  expect(login).toHaveBeenCalledWith({ profile: 'teacher', register: true });
+  expect(
+    screen.queryByRole('button', { name: 'Vincular cuenta de GitHub' }),
+  ).not.toBeInTheDocument();
 });
 
-it('allows SSO without submitting invalid local email input', async () => {
-  const user = userEvent.setup();
-  const service = createDemoSession();
-  const login = vi.spyOn(service, 'login');
-  renderLogin({ service, demo: false });
-  await screen.findByRole('button', { name: 'SSO institucional' });
-  await user.type(screen.getByLabelText(/Correo institucional/), 'invalid');
-  await user.click(screen.getByRole('button', { name: 'SSO institucional' }));
-  await waitFor(() =>
-    expect(login).toHaveBeenCalledWith({ profile: 'teacher' }),
-  );
+it('shows only login and registration actions in real mode', async () => {
+  renderLogin({
+    demo: false,
+    service: { ...createDemoSession(), registrationEnabled: true },
+  });
+  expect(
+    await screen.findByRole('button', { name: 'Iniciar sesión' }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole('button', { name: 'Crear cuenta' }),
+  ).toBeInTheDocument();
+  expect(screen.getAllByRole('button')).toHaveLength(2);
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  expect(screen.queryByLabelText('Contraseña')).not.toBeInTheDocument();
 });
-
 it('retains a protected destination with query and hash through login', async () => {
   const user = userEvent.setup();
   const router = renderLogin({
@@ -231,12 +231,10 @@ it('renders authentication errors and allows retry', async () => {
   const login = vi.fn().mockRejectedValue(new Error('Provider unavailable'));
   renderLogin({ service: { ...createDemoSession(), login }, demo: false });
   await user.click(
-    await screen.findByRole('button', { name: 'SSO institucional' }),
+    await screen.findByRole('button', { name: 'Iniciar sesión' }),
   );
   expect(await screen.findByRole('alert')).toHaveTextContent(
     'No se pudo iniciar sesión',
   );
-  expect(
-    screen.getByRole('button', { name: 'SSO institucional' }),
-  ).toBeEnabled();
+  expect(screen.getByRole('button', { name: 'Iniciar sesión' })).toBeEnabled();
 });

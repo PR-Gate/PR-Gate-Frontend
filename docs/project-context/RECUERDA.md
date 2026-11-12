@@ -1,6 +1,26 @@
 # Contexto y acuerdos del proyecto
 
-Este documento reúne las decisiones que deben conservarse al implementar nuevas secciones de **Orquestador Académico / PR Gate**. Los prompts de diseño pueden no conocer este contexto: sus propuestas visuales deben adaptarse a la solución existente.
+Vinculación GitHub: consultar [contrato y estado de integración](../github-link.md).
+Por solicitud posterior del usuario, se admiten repositorios privados y organizaciones
+autorizados mediante la GitHub App. Las credenciales GitHub se cifran en Users
+con AES-256-GCM y una clave privada de entorno; nunca llegan al frontend.
+V4 conserva las identidades existentes y requiere renovar la autorización.
+El usuario aplica las migraciones mediante su propio arranque del servicio.
+El arranque normal usa Keycloak y servicios locales, sin MSW. El backend incorpora
+la resolución del perfil académico. El usuario actualizó el servicio sobre su
+base existente y el log confirmó V3 aplicada y arranque correcto con Keycloak.
+La autorización GitHub real aún debe verificarse.
+
+Por solicitud del usuario, `/register` permite elegir Docente o Estudiante antes
+de continuar con Keycloak. El backend valida y persiste la elección únicamente
+al crear el perfil inicial; no permite ADMIN ni cambia roles existentes desde
+el registro. `/account` permite completar esa elección si la identidad Keycloak
+ya existe pero falta el perfil académico. El Compose normal conserva los perfiles
+local,keycloak para que no desaparezcan los endpoints de sesión al reiniciar.
+
+Este documento reúne las decisiones que deben conservarse al implementar nuevas secciones de **PR Gate**. Los prompts de diseño pueden no conocer este contexto: sus propuestas visuales deben adaptarse a la solución existente.
+
+El nombre oficial de la solución es **PR Gate**. Utilizarlo en el login, la navegación, los títulos, las exportaciones y la documentación, aunque una referencia visual o un prompt genérico muestre otra marca.
 
 Si una instrucción posterior cambia explícitamente un acuerdo, actualizar este documento para mantener una referencia vigente.
 
@@ -10,9 +30,12 @@ La plataforma acompaña proyectos universitarios de desarrollo de software media
 
 Existen experiencias diferenciadas para docentes y estudiantes. El backend previsto utiliza Java/Spring Boot, microservicios y APIs REST mediante un API Gateway. Sus seis dominios son Users, Projects, CI/CD, Metrics, AI Practice y Notifications. Una nueva feature frontend no implica crear un nuevo microservicio.
 
-## 2. El backend todavía no está integrado
+## 2. Integración progresiva con el backend local
 
-**Por ahora usamos datos mockeados, pero el frontend debe construirse para consumir APIs y endpoints.**
+**El arranque normal no usa datos mockeados.** Se está conectando sesión, perfil
+académico y GitHub con users-service local. Las demás secciones conservan su bloqueo
+hasta confirmar y conectar sus contratos. MSW y fixtures permanecen para pruebas
+y para la demo explícita, fuera del flujo normal.
 
 Flujo que deben seguir las operaciones de negocio:
 
@@ -24,7 +47,7 @@ Página / componente
   ← implementación del repositorio en Infrastructure
   → API service
   → HttpClient / Axios
-  → endpoint simulado por MSW
+  → endpoint del backend (o MSW exclusivamente en pruebas/demo explícita)
 ```
 
 Cuando esté disponible el backend, la última frontera será API Gateway → microservicio real. Se confirmarán endpoints, DTOs, permisos y formatos; se adaptarán los servicios y mappers conservando las pantallas y los casos de uso cuando el contrato funcional lo permita.
@@ -117,3 +140,35 @@ Una respuesta HTTP 200 o una prueba en jsdom no sustituyen la revisión visual e
 - [Rúbricas](../rubrics.md): versiones, importación y consulta estudiantil.
 - [Estudiantes](../students.md): listado por curso, contribución y exportación.
 - [Inventario de archivos](../file-tree.txt).
+
+## 9. Autenticación local con Keycloak (11 de noviembre de 2026)
+
+npm run dev:keycloak inicia Vite en http://localhost:5173/login con una
+configuración explícita que deshabilita la carga de archivos .env. Requiere
+Keycloak en localhost:8090, realm prgate y cliente público prgate-frontend.
+No activa MSW ni las APIs de negocio en este modo. npm run dev conserva su
+comportamiento previo, incluida la demo cuando se configura.
+
+El acceso real ofrece Iniciar sesión y Crear cuenta. El registro usa prompt=create
+en una nueva autorización OIDC con PKCE; el formulario y las contraseñas pertenecen
+a Keycloak. El selector de perfiles y su preferencia se conservan solo en la demo;
+no asignan permisos en el acceso real.
+
+El adaptador admite VITE_OIDC_PROVIDER=keycloak y utiliza el end-session endpoint
+OIDC para logout, conservando compatibilidad con Cognito. Los tokens siguen en
+memoria, con estado transitorio de protocolo en sessionStorage y renovación
+automática en Keycloak. No se muestran JWT ni se guardan tokens en localStorage.
+
+Al completar el login, /account presenta nombre, correo y cierre de sesión. La
+identidad se marca academicProfilePending, sin roles de negocio. ProtectedRoute
+impide acceder a las demás rutas hasta conectar el perfil académico. Esta pantalla
+verifica autenticación, no integración con usuarios, proyectos, rúbricas o IA.
+El UUID, rol y estado oficiales de PR-Gate se obtendrán de users-service cuando
+se adapte a Keycloak; no se debe tratar el sub de Keycloak como ese UUID local.
+
+Verificación: typecheck, lint, arquitectura y compilación Keycloak local
+aprobados; 118 pruebas aprobadas con --maxWorkers=1. La pantalla pública de
+registro de Keycloak se comprobó por HTTP. La revisión visual quedó pendiente
+porque la herramienta no tenía autorización para usar Chrome. No se crearon
+cuentas reales ni se completó una sesión del usuario durante la verificación.
+Se preservaron los cambios locales previos de develop.

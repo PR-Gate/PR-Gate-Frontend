@@ -5,9 +5,17 @@ export function installInterceptors(
   client: AxiosInstance,
   getToken: () => Promise<string | undefined>,
   onUnauthorized: () => Promise<void>,
+  requireAccessToken = false,
 ) {
   client.interceptors.request.use(async (config) => {
     const token = await getToken();
+    if (requireAccessToken && !token?.trim()) {
+      throw new HttpError(
+        'La sesión todavía no tiene un token de acceso. Inicia sesión nuevamente.',
+        401,
+        'ACCESS_TOKEN_MISSING',
+      );
+    }
     if (token) config.headers.set('Authorization', `Bearer ${token}`);
     return config;
   });
@@ -27,7 +35,9 @@ export function installInterceptors(
                 ? 'No se pudo conectar con el servidor.'
                 : 'No se pudo completar la solicitud.',
           status,
-          error.code,
+          typeof error.response?.data?.code === 'string'
+            ? error.response.data.code
+            : error.code,
         );
       }
       throw error;

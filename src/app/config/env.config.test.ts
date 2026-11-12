@@ -18,3 +18,15 @@ it('rejects demo mode in production and without mocks', () => {
 it('requires real OIDC configuration rather than silently granting access', () => {
   expect(() => readEnvironment({})).toThrow();
 });
+it('accepts Keycloak without requiring a Cognito-specific logout URL', () => {
+  expect(
+    readEnvironment({
+      VITE_AUTH_MODE: 'oidc',
+      VITE_OIDC_PROVIDER: 'keycloak',
+      VITE_OIDC_AUTHORITY: 'http://localhost:8090/realms/prgate',
+      VITE_OIDC_CLIENT_ID: 'prgate-frontend',
+      VITE_OIDC_REDIRECT_URI: 'http://localhost:5173/login',
+      VITE_OIDC_LOGOUT_URI: 'http://localhost:5173/login',
+    }).VITE_OIDC_PROVIDER,
+  ).toBe('keycloak');
+});

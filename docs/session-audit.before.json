@@ -1,0 +1,55 @@
+﻿{
+  "expected": {
+    "issuer": "http://localhost:8090/realms/prgate",
+    "audience": "prgate-api",
+    "clientId": "prgate-frontend"
+  },
+  "records": [
+    {
+      "id": "4938584b-6ed3-42aa-bdce-3c9b28b54bb3",
+      "time": "2026-11-12T00:45:29.095Z",
+      "source": "account",
+      "method": "POST",
+      "frontendUrl": "http://localhost:5173/api/me/session",
+      "backendUrl": "http://localhost:8080/api/me/session",
+      "signatureValid": true,
+      "token": {
+        "hasBearer": true,
+        "tokenReadable": true,
+        "issuerMatches": true,
+        "audienceMatches": true,
+        "clientMatches": true,
+        "subjectValid": false,
+        "typeMatches": true,
+        "expirationValid": true,
+        "algorithmMatches": true,
+        "headerType": "JWT"
+      },
+      "status": 401,
+      "errorCode": "AUTHENTICATION_REQUIRED"
+    },
+    {
+      "id": "4aa339cd-756a-461d-b5ce-a709baef21e4",
+      "time": "2026-11-12T00:45:29.545Z",
+      "source": "account",
+      "method": "POST",
+      "frontendUrl": "http://localhost:5173/api/me/session",
+      "backendUrl": "http://localhost:8080/api/me/session",
+      "signatureValid": true,
+      "token": {
+        "hasBearer": true,
+        "tokenReadable": true,
+        "issuerMatches": true,
+        "audienceMatches": true,
+        "clientMatches": true,
+        "subjectValid": false,
+        "typeMatches": true,
+        "expirationValid": true,
+        "algorithmMatches": true,
+        "headerType": "JWT"
+      },
+      "status": 401,
+      "errorCode": "AUTHENTICATION_REQUIRED"
+    }
+  ]
+}

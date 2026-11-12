@@ -4,7 +4,10 @@ import type { GetTeacherOverviewUseCase } from '@/features/metrics/application/u
 import type { AssessmentDependencies } from '@/features/assessments/presentation/hooks/use-assessments';
 import type { RubricDependencies } from '@/features/rubrics/presentation/hooks/use-rubrics';
 import type { StudentDependencies } from '@/features/users/presentation/hooks/use-students';
+import type { GitHubLinkDependencies } from '@/features/users/presentation/hooks/use-github-link';
 export interface AppDependencies {
+  repositoryProjects: import('@/features/projects/application/use-cases/repository-projects.use-cases').RepositoryProjectsUseCases;
+  github: GitHubLinkDependencies;
   projects: ProjectsDependencies;
   auth: AuthSessionService;
   teacherOverview: GetTeacherOverviewUseCase;

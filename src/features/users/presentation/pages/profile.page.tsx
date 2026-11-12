@@ -1,5 +1,6 @@
 import { useAuth } from '@/shared/services/auth/auth-context';
-export default function ProfilePage() {
+import { GitHubLinkCard } from '../components/github-link-card';
+export default function ProfilePage({ demo = false }: { demo?: boolean }) {
   const { user } = useAuth();
   return (
     <section>
@@ -17,6 +18,7 @@ export default function ProfilePage() {
           </div>
         ))}
       </dl>
+      {user?.roles.includes('STUDENT') && <GitHubLinkCard demo={demo} />}
     </section>
   );
 }

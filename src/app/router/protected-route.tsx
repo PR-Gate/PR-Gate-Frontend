@@ -9,6 +9,8 @@ export function ProtectedRoute() {
         Recuperando sesión…
       </p>
     );
+  if (user?.academicProfilePending && location.pathname !== '/account')
+    return <Navigate to="/account" replace />;
   return user ? (
     <Outlet />
   ) : (

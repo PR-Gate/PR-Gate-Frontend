@@ -87,14 +87,14 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
       >
         <Link
           to={isTeacher ? '/teacher/dashboard' : '/dashboard'}
-          aria-label="Orquestador académico · Inicio"
+          aria-label="PR Gate · Inicio"
           className="dashboard-brand flex h-20 shrink-0 items-center gap-3 px-7"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <ChartNoAxesColumnIncreasing size={23} />
           </div>
           <span className="dashboard-sidebar-label text-sm font-bold">
-            Orquestador
+            PR Gate
             <span className="mt-1 block text-[8px] font-normal tracking-[.2em] text-sidebar-highlight">
               ACADÉMICO
             </span>

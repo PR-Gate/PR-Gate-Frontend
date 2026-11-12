@@ -11,6 +11,7 @@ const schema = z
       .default('/api'),
     VITE_ENABLE_MOCKS: z.enum(['true', 'false']).default('false'),
     VITE_AUTH_MODE: z.enum(['demo', 'oidc']).default('oidc'),
+    VITE_OIDC_PROVIDER: z.enum(['cognito', 'keycloak']).default('cognito'),
     VITE_OIDC_AUTHORITY: z.string().optional(),
     VITE_OIDC_CLIENT_ID: z.string().optional(),
     VITE_OIDC_REDIRECT_URI: z.string().optional(),
@@ -23,7 +24,6 @@ const schema = z
         'VITE_OIDC_AUTHORITY',
         'VITE_OIDC_REDIRECT_URI',
         'VITE_OIDC_LOGOUT_URI',
-        'VITE_COGNITO_LOGOUT_URL',
       ] as const) {
         if (!z.url().safeParse(value[key]).success)
           ctx.addIssue({
@@ -32,6 +32,15 @@ const schema = z
             message: 'Configure una URL válida para OIDC/Cognito',
           });
       }
+      if (
+        value.VITE_OIDC_PROVIDER === 'cognito' &&
+        !z.url().safeParse(value.VITE_COGNITO_LOGOUT_URL).success
+      )
+        ctx.addIssue({
+          code: 'custom',
+          path: ['VITE_COGNITO_LOGOUT_URL'],
+          message: 'Configure el cierre de sesión Cognito',
+        });
       if (!value.VITE_OIDC_CLIENT_ID)
         ctx.addIssue({
           code: 'custom',

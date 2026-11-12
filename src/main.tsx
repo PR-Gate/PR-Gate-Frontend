@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { readEnvironment } from './app/config/env.config';
 import { createDependencies } from './app/di/container';
-import { createDemoSession } from './features/users/infrastructure/auth/demo-session.adapter';
+import { createBackendSession } from './features/users/infrastructure/auth/backend-session.adapter';
 import { App } from './app/app';
 import './shared/styles/globals.css';
 
@@ -14,7 +14,9 @@ async function bootstrap() {
   }
   const auth =
     config.VITE_AUTH_MODE === 'demo'
-      ? createDemoSession()
+      ? (
+          await import('./features/users/infrastructure/auth/demo-session.adapter')
+        ).createDemoSession()
       : (
           await import('./features/users/infrastructure/auth/oidc-session.adapter')
         ).createOidcSession({
@@ -23,11 +25,22 @@ async function bootstrap() {
           redirectUri: config.VITE_OIDC_REDIRECT_URI!,
           logoutUri: config.VITE_OIDC_LOGOUT_URI!,
           cognitoLogoutUrl: config.VITE_COGNITO_LOGOUT_URL!,
+          provider: config.VITE_OIDC_PROVIDER,
         });
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <App
-        dependencies={createDependencies(config.VITE_API_BASE_URL, auth)}
+        dependencies={createDependencies(
+          config.VITE_API_BASE_URL,
+          config.VITE_AUTH_MODE === 'oidc' &&
+            config.VITE_OIDC_PROVIDER === 'keycloak'
+            ? createBackendSession(auth, config.VITE_API_BASE_URL, {
+                issuer: config.VITE_OIDC_AUTHORITY,
+                clientId: config.VITE_OIDC_CLIENT_ID,
+                audience: 'prgate-api',
+              })
+            : auth,
+        )}
         demo={config.VITE_AUTH_MODE === 'demo'}
       />
     </StrictMode>,

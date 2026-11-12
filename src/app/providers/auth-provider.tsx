@@ -72,7 +72,45 @@ export function AuthProvider({
     }
   }, [service, queryClient]);
   return (
-    <AuthContext.Provider value={{ ...state, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        ...state,
+        login,
+        logout,
+        registrationEnabled: service.registrationEnabled === true,
+        completeProfile: service.completeProfile
+          ? async (profile) => {
+              setState((s) => ({ ...s, loading: true, error: null }));
+              try {
+                const user = await service.completeProfile!(profile);
+                queryClient.clear();
+                setState({ user, loading: false, error: null });
+              } catch {
+                setState((s) => ({
+                  ...s,
+                  loading: false,
+                  error:
+                    'No se pudo guardar el perfil. Comprueba la conexión y vuelve a intentarlo.',
+                }));
+              }
+            }
+          : undefined,
+        refreshSession: async () => {
+          setState((s) => ({ ...s, loading: true }));
+          try {
+            const user = await service.getUser();
+            queryClient.clear();
+            setState({ user, loading: false, error: null });
+          } catch {
+            setState((s) => ({
+              ...s,
+              loading: false,
+              error: 'No se pudo actualizar la sesión.',
+            }));
+          }
+        },
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

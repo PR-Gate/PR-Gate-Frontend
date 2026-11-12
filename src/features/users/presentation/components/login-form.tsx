@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircle, Mail, ShieldCheck } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
@@ -13,6 +14,7 @@ export function LoginForm({
   demo: boolean;
   session: ReturnType<typeof useLogin>;
 }) {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -22,6 +24,43 @@ export function LoginForm({
     defaultValues: { email: '' },
   });
   const busy = session.loading || session.submitting;
+  if (!demo)
+    return (
+      <form
+        className="login-form"
+        aria-label="Acceso institucional"
+        aria-busy={busy}
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!busy) void session.submit();
+        }}
+      >
+        {session.error && (
+          <p role="alert" className="login-auth-error">
+            {session.error}
+          </p>
+        )}
+        <Button type="submit" className="login-primary" disabled={busy}>
+          Iniciar sesión
+        </Button>
+        {session.registrationEnabled && (
+          <>
+            <div className="login-divider">
+              <span>o</span>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="login-sso"
+              disabled={busy}
+              onClick={() => navigate('/register')}
+            >
+              Crear cuenta
+            </Button>
+          </>
+        )}
+      </form>
+    );
   return (
     <form
       className="login-form"
@@ -30,11 +69,13 @@ export function LoginForm({
       aria-label="Acceso institucional"
       aria-busy={busy}
     >
-      <LoginRoleSelector
-        value={session.profile}
-        onChange={session.setProfile}
-        disabled={busy}
-      />
+      {demo && (
+        <LoginRoleSelector
+          value={session.profile}
+          onChange={session.setProfile}
+          disabled={busy}
+        />
+      )}
       <div className="login-field">
         <label htmlFor="login-email">
           Correo institucional <span>(opcional)</span>
@@ -88,15 +129,19 @@ export function LoginForm({
             : 'La contraseña y su recuperación se gestionan con tu institución.'}
         </p>
       </div>
-      <label className="login-remember">
-        <input
-          type="checkbox"
-          checked={session.rememberProfile}
-          disabled={busy}
-          onChange={(event) => session.setRememberProfile(event.target.checked)}
-        />
-        <span>Recordar mi perfil</span>
-      </label>
+      {demo && (
+        <label className="login-remember">
+          <input
+            type="checkbox"
+            checked={session.rememberProfile}
+            disabled={busy}
+            onChange={(event) =>
+              session.setRememberProfile(event.target.checked)
+            }
+          />
+          <span>Recordar mi perfil</span>
+        </label>
+      )}
       {session.error && (
         <p role="alert" className="login-auth-error">
           {session.error}
@@ -132,6 +177,25 @@ export function LoginForm({
             SSO institucional
           </Button>
         </>
+      )}
+      {!demo && session.registrationEnabled && (
+        <Button
+          type="button"
+          variant="outline"
+          className="login-sso"
+          disabled={busy}
+          onClick={() => {
+            navigate('/register');
+          }}
+        >
+          Crear cuenta
+        </Button>
+      )}
+      {!demo && (
+        <p className="login-field-help">
+          Después de iniciar sesión, encontrarás «Vincular cuenta de GitHub» en
+          tu cuenta de estudiante. Ese botón abre el acceso oficial de GitHub.
+        </p>
       )}
       <p className="login-access-note">
         {demo

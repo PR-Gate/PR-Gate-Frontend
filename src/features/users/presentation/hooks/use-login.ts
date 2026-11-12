@@ -42,7 +42,7 @@ export function useLogin() {
     if (auth.user) clearLoginDestination();
   }, [auth.user]);
 
-  const submit = async (email?: string) => {
+  const submit = async (email?: string, register = false) => {
     if (auth.loading || inFlight.current) return;
     inFlight.current = true;
     setSubmitting(true);
@@ -57,6 +57,7 @@ export function useLogin() {
       await auth.login({
         profile,
         ...(email?.trim() ? { loginHint: email.trim() } : {}),
+        ...(register ? { register: true } : {}),
       });
     } finally {
       inFlight.current = false;

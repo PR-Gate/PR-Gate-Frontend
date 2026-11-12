@@ -5,6 +5,7 @@ export const navigation = [
   { path: '/feedback', label: 'Retroalimentación', icon: 'feedback' },
   { path: '/practice', label: 'Práctica y refuerzo', icon: 'practice' },
   { path: '/notifications', label: 'Notificaciones', icon: 'notifications' },
+  { path: '/profile', label: 'Mi perfil', icon: 'settings' },
 ] as const;
 export const teacherRoutes = [
   { path: '/teacher/dashboard', title: 'Panel docente' },

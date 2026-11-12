@@ -2,7 +2,7 @@
 
 ## Decisión de arquitectura
 
-Este módulo sigue el contexto de Orquestador Académico, incluso cuando un prompt de UI mencione únicamente estado local. La fuente de datos es una API simulada por MSW y no una lista mantenida en componentes:
+Este módulo sigue el contexto de PR Gate, incluso cuando un prompt de UI mencione únicamente estado local. La fuente de datos es una API simulada por MSW y no una lista mantenida en componentes:
 
 ```text
 Página → hook TanStack Query → caso de uso → RubricRepository

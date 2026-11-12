@@ -10,29 +10,31 @@ Requiere Node.js LTS 22.12+ (validado con Node 24.18.0) y npm.
 
 ```powershell
 npm install
-Copy-Item .env.example .env
 npm run dev
 ```
 
-Si PowerShell bloquea `npm.ps1`, utiliza `npm.cmd`. Abre la URL de Vite (normalmente `http://localhost:5173`) y pulsa **Explorar demostración** para ingresar como docente. No requiere credenciales ni backend: MSW intercepta las solicitudes de Axios.
+Si PowerShell bloquea `npm.ps1`, utiliza `npm.cmd`. Abre `http://localhost:5173/login`. El arranque normal usa Keycloak en `localhost:8090`, conecta `/api` con users-service en `localhost:8080` y desactiva MSW. Esta configuración local explícita no carga `.env`.
 
-La demostración permite listar, buscar, filtrar, cambiar entre tarjetas y tabla, consultar detalle y crear proyectos con validación. Incluye además el resumen docente con indicadores y reportes simulados. Los datos viven en memoria del worker y se reinician al recargar. Los repositorios y proyectos de ejemplo son ficticios. Las secciones aún no implementadas indican su estado pendiente.
+Tras autenticarse, el frontend solicita el perfil académico a `POST /api/me/session`. El estudiante llega a `/account`, donde puede vincular su identidad de GitHub y consultar el estado confirmado por el backend. La imagen de users-service debe incluir soporte Keycloak y las migraciones correspondientes; consulta [la integración y recuperación de GitHub](docs/github-link.md). Proyectos, rúbricas y las demás secciones sin conexión confirmada muestran su estado pendiente.
+
+Las fixtures y MSW se conservan para las pruebas. La demo solo se inicia explícitamente con `npm run dev:demo` y una configuración `VITE_AUTH_MODE=demo`, `VITE_ENABLE_MOCKS=true`. Sus datos no representan actividad real.
 
 ## Comandos
 
-| Comando                                   | Función                           |
-| ----------------------------------------- | --------------------------------- |
-| `npm run dev`                             | Desarrollo local                  |
-| `npm run typecheck`                       | TypeScript estricto               |
-| `npm run lint`                            | ESLint y límites arquitectónicos  |
-| `npm run architecture`                    | Dependencias prohibidas y ciclos  |
-| `npm test`                                | Vitest, RTL y MSW sin backend     |
-| `npm run test:watch`                      | Pruebas durante desarrollo        |
-| `npm run build`                           | TypeScript y bundle de producción |
-| `npm run preview`                         | Servir bundle generado            |
-| `npm run format` / `npm run format:check` | Aplicar / comprobar Prettier      |
+| Comando                                   | Función                                 |
+| ----------------------------------------- | --------------------------------------- |
+| `npm run dev`                             | Servicios locales y Keycloak, sin mocks |
+| `npm run dev:demo`                        | Demo opcional con MSW configurado       |
+| `npm run typecheck`                       | TypeScript estricto                     |
+| `npm run lint`                            | ESLint y límites arquitectónicos        |
+| `npm run architecture`                    | Dependencias prohibidas y ciclos        |
+| `npm test`                                | Vitest, RTL y MSW sin backend           |
+| `npm run test:watch`                      | Pruebas durante desarrollo              |
+| `npm run build`                           | TypeScript y bundle de producción       |
+| `npm run preview`                         | Servir bundle generado                  |
+| `npm run format` / `npm run format:check` | Aplicar / comprobar Prettier            |
 
-El build compila sin credenciales, pero el **arranque del bundle de producción exige OIDC configurado y mocks desactivados**. Un bundle compilado con `.env` de demostración muestra un error de configuración en producción. Configura `.env.production.local` antes de generar el artefacto para despliegue; utiliza `npm run dev` para la demo. El hosting debe redirigir las rutas SPA a `index.html`.
+El build compila sin credenciales, pero el **arranque del bundle de producción exige OIDC configurado y mocks desactivados**. Un bundle compilado con `.env` de demostración muestra un error de configuración en producción. Configura `.env.production.local` antes de generar el artefacto para despliegue. El hosting debe redirigir las rutas SPA a `index.html` y enrutar `/api` al backend. La configuración local de Keycloak no sustituye la configuración de producción.
 
 ## Tecnologías
 

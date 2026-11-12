@@ -6,6 +6,14 @@ import { GetProjectByIdUseCase } from '@/features/projects/application/use-cases
 import { CreateProjectUseCase } from '@/features/projects/application/use-cases/create-project.use-case';
 import type { AuthSessionService } from '@/shared/services/auth/auth-session.service';
 import type { AppDependencies } from './dependencies';
+import { RepositoryProjectsUseCases } from '@/features/projects/application/use-cases/repository-projects.use-cases';
+import { RepositoryProjectsApi } from '@/features/projects/infrastructure/services/repository-projects-api.service';
+import { GitHubLinkRepositoryImpl } from '@/features/users/infrastructure/repositories/github-link.repository.impl';
+import { GitHubLinkApiService } from '@/features/users/infrastructure/services/github-link-api.service';
+import {
+  GetGitHubLinkUseCase,
+  AuthorizeGitHubLinkUseCase,
+} from '@/features/users/application/use-cases/github-link.use-cases';
 import { MetricsApiService } from '@/features/metrics/infrastructure/services/metrics-api.service';
 import { TeacherOverviewRepositoryImpl } from '@/features/metrics/infrastructure/repositories/teacher-overview.repository.impl';
 import { GetTeacherOverviewUseCase } from '@/features/metrics/application/use-cases/get-teacher-overview.use-case';
@@ -52,8 +60,34 @@ export function createDependencies(
   );
   const rubrics = new RubricRepositoryImpl(new RubricApiService(http));
   const students = new StudentRepositoryImpl(new StudentApiService(http));
+  const github = new GitHubLinkRepositoryImpl(
+    new GitHubLinkApiService(
+      createHttpClient(
+        baseUrl,
+        () => auth.getAccessToken(),
+        () => auth.expire(),
+        true,
+        { requireAccessToken: true },
+      ),
+    ),
+  );
   return {
+    repositoryProjects: new RepositoryProjectsUseCases(
+      new RepositoryProjectsApi(
+        createHttpClient(
+          baseUrl,
+          () => auth.getAccessToken(),
+          () => auth.expire(),
+          true,
+          { requireAccessToken: true },
+        ),
+      ),
+    ),
     auth,
+    github: {
+      get: new GetGitHubLinkUseCase(github),
+      authorize: new AuthorizeGitHubLinkUseCase(github),
+    },
     students: {
       roster: new GetCourseStudentsUseCase(students),
       contribution: new GetStudentContributionUseCase(students),

@@ -16,7 +16,7 @@ export function serializeStudentsCsv(
   students: readonly CourseStudent[],
 ): string {
   const rows: (string | number)[][] = [
-    ['Orquestador Académico · DEMOSTRACIÓN · Datos simulados'],
+    ['PR Gate · DEMOSTRACIÓN · Datos simulados'],
     ['Curso', course.name, 'Sección', course.section, 'Ciclo', course.term],
     ['La participación es una señal orientativa y no una calificación.'],
     [

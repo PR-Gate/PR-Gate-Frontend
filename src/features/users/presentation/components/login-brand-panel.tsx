@@ -12,7 +12,7 @@ export function LoginBrandPanel() {
           <ChartNoAxesColumnIncreasing size={24} aria-hidden="true" />
         </span>
         <span>
-          <strong>Orquestador</strong>
+          <strong>PR Gate</strong>
           <span className="login-brand-subtitle">ACADÉMICO</span>
         </span>
       </div>
