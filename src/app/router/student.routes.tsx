@@ -1,28 +1,17 @@
 import type { RouteObject } from 'react-router';
-import { RoleGuard } from './role-guard';
+import { TeacherOnlyRoute } from '@/shared/components/guards/teacher-only-route';
 import { ModulePlaceholder } from '@/shared/components/common/module-placeholder';
 import { studentRoutes } from '../config/routes.config';
 export function createStudentRoutes(demo: boolean): RouteObject[] {
   return [
     {
-      element: <RoleGuard roles={['TEACHER']} />,
+      element: <TeacherOnlyRoute />,
       children: [
         {
           path: studentRoutes.list,
           lazy: async () => {
-            const { default: StudentsPage } =
-              await import('@/features/users/presentation/pages/students.page');
-            return {
-              Component: () =>
-                demo ? (
-                  <StudentsPage />
-                ) : (
-                  <ModulePlaceholder
-                    title="Estudiantes"
-                    description="La consulta real de estudiantes se habilitará cuando estén definidos los endpoints del backend."
-                  />
-                ),
-            };
+            const { TeacherStudentsPage } = await import('@/features/users');
+            return { Component: TeacherStudentsPage };
           },
         },
         {

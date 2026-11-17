@@ -10,6 +10,8 @@ import { adminRoutes, teacherRoutes } from '../config/routes.config';
 import { DashboardPage, NotFoundPage, UnauthorizedPage } from './static-pages';
 import { createStudentRoutes } from './student.routes';
 import RepositoryProjectsPage from '@/features/projects/presentation/pages/repository-projects.page';
+import { StudentOnlyRoute } from '@/shared/components/guards/student-only-route';
+import { TeacherOnlyRoute } from '@/shared/components/guards/teacher-only-route';
 
 export function createAppRouter(demo: boolean) {
   return createBrowserRouter([
@@ -61,6 +63,39 @@ export function createAppRouter(demo: boolean) {
                 { index: true, element: <Navigate to="/dashboard" replace /> },
                 { path: '/dashboard', element: <DashboardPage /> },
                 {
+                  path: '/teacher/courses',
+                  element: <TeacherOnlyRoute />,
+                  children: [
+                    {
+                      index: true,
+                      lazy: async () => ({
+                        Component: (await import('@/features/projects'))
+                          .TeacherCoursesPage,
+                      }),
+                    },
+                  ],
+                },
+                {
+                  path: '/pipelines',
+                  element: <StudentOnlyRoute />,
+                  children: [
+                    {
+                      index: true,
+                      lazy: async () => ({
+                        Component: (await import('@/features/cicd'))
+                          .PipelinesPage,
+                      }),
+                    },
+                  ],
+                },
+                {
+                  path: '/quality-gate',
+                  lazy: async () => ({
+                    Component: (await import('@/features/cicd'))
+                      .QualityGatesPage,
+                  }),
+                },
+                {
                   path: '/projects',
                   lazy: async () => ({
                     Component: demo
@@ -91,9 +126,16 @@ export function createAppRouter(demo: boolean) {
                 },
                 {
                   path: '/projects/:projectId/pipelines',
-                  lazy: async () => ({
-                    Component: (await import('@/features/cicd')).PipelinesPage,
-                  }),
+                  element: <StudentOnlyRoute />,
+                  children: [
+                    {
+                      index: true,
+                      lazy: async () => ({
+                        Component: (await import('@/features/cicd'))
+                          .PipelinesPage,
+                      }),
+                    },
+                  ],
                 },
                 {
                   path: '/projects/:projectId/quality-gates',
@@ -109,18 +151,18 @@ export function createAppRouter(demo: boolean) {
                   }),
                 },
                 {
-                  path: '/feedback',
-                  lazy: async () => ({
-                    Component: (await import('@/features/ai-practice'))
-                      .FeedbackPage,
-                  }),
-                },
-                {
                   path: '/practice',
-                  lazy: async () => ({
-                    Component: (await import('@/features/ai-practice'))
-                      .PracticePage,
-                  }),
+                  lazy: async () => {
+                    const { StudentTestsPage } =
+                      await import('@/features/ai-practice');
+                    return {
+                      Component: () => (
+                        <RoleGuard roles={['STUDENT']}>
+                          <StudentTestsPage />
+                        </RoleGuard>
+                      ),
+                    };
+                  },
                 },
                 {
                   path: '/notifications',
@@ -145,35 +187,21 @@ export function createAppRouter(demo: boolean) {
                         ? {
                             path: route.path,
                             lazy: async () => ({
-                              Component: demo
-                                ? (await import('@/features/metrics'))
-                                    .TeacherDashboardPage
-                                : () => (
-                                    <ModulePlaceholder
-                                      title="Resumen docente"
-                                      description="El resumen está disponible en la demostración local. Su conexión con datos reales se habilitará cuando el contrato del backend esté definido."
-                                    />
-                                  ),
+                              Component: (await import('@/features/metrics'))
+                                .TeacherSummaryPage,
                             }),
                           }
                         : route.path === '/teacher/rubrics'
                           ? {
                               path: route.path,
                               lazy: async () => {
-                                const { RubricsPage } =
+                                const { TeacherRubricsPage } =
                                   await import('@/features/rubrics');
                                 return {
                                   Component: () => (
-                                    <RoleGuard roles={['TEACHER']}>
-                                      {demo ? (
-                                        <RubricsPage />
-                                      ) : (
-                                        <ModulePlaceholder
-                                          title="Rúbricas"
-                                          description="La conexión real de rúbricas se habilitará cuando los endpoints del backend estén definidos."
-                                        />
-                                      )}
-                                    </RoleGuard>
+                                    <TeacherOnlyRoute>
+                                      <TeacherRubricsPage />
+                                    </TeacherOnlyRoute>
                                   ),
                                 };
                               },
@@ -182,20 +210,13 @@ export function createAppRouter(demo: boolean) {
                             ? {
                                 path: route.path,
                                 lazy: async () => {
-                                  const { AssessmentsPage } =
+                                  const { TeacherTestsPage } =
                                     await import('@/features/assessments');
                                   return {
                                     Component: () => (
-                                      <RoleGuard roles={['TEACHER']}>
-                                        {demo ? (
-                                          <AssessmentsPage />
-                                        ) : (
-                                          <ModulePlaceholder
-                                            title="Tests y evaluaciones"
-                                            description="Esta sección usa datos de demostración. La conexión real se habilitará cuando el backend y sus contratos estén definidos."
-                                          />
-                                        )}
-                                      </RoleGuard>
+                                      <TeacherOnlyRoute>
+                                        <TeacherTestsPage />
+                                      </TeacherOnlyRoute>
                                     ),
                                   };
                                 },
@@ -213,20 +234,13 @@ export function createAppRouter(demo: boolean) {
                     {
                       path: '/teacher/evaluations/:testId',
                       lazy: async () => {
-                        const { AssessmentDetailPage } =
+                        const { TeacherTestReviewPage } =
                           await import('@/features/assessments');
                         return {
                           Component: () => (
-                            <RoleGuard roles={['TEACHER']}>
-                              {demo ? (
-                                <AssessmentDetailPage />
-                              ) : (
-                                <ModulePlaceholder
-                                  title="Tests y evaluaciones"
-                                  description="La integración con datos reales sigue pendiente del backend."
-                                />
-                              )}
-                            </RoleGuard>
+                            <TeacherOnlyRoute>
+                              <TeacherTestReviewPage />
+                            </TeacherOnlyRoute>
                           ),
                         };
                       },
@@ -249,19 +263,12 @@ export function createAppRouter(demo: boolean) {
                 {
                   path: '/my-rubric',
                   lazy: async () => {
-                    const { StudentRubricPage } =
+                    const { StudentResultPage } =
                       await import('@/features/rubrics');
                     return {
                       Component: () => (
                         <RoleGuard roles={['STUDENT']}>
-                          {demo ? (
-                            <StudentRubricPage />
-                          ) : (
-                            <ModulePlaceholder
-                              title="Mi rúbrica"
-                              description="La consulta de la rúbrica asignada se habilitará al integrar el backend."
-                            />
-                          )}
+                          <StudentResultPage />
                         </RoleGuard>
                       ),
                     };

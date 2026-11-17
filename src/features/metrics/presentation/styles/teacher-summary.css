@@ -1,0 +1,302 @@
+.teacher-summary {
+  display: grid;
+  gap: 22px;
+}
+.teacher-summary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.teacher-summary-heading .eyebrow {
+  text-transform: uppercase;
+}
+.teacher-summary-heading > div > p:last-child {
+  margin-top: 9px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.teacher-summary-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.teacher-summary-actions p {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  margin-top: 6px;
+}
+.teacher-summary-panel {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: white;
+  box-shadow:
+    0 3px 5px rgb(24 36 59 / 2%),
+    0 8px 24px rgb(24 36 59 / 3%);
+}
+.teacher-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.teacher-summary-stat {
+  display: flex;
+  gap: 14px;
+  padding: 23px 20px;
+}
+.teacher-summary-icon {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+.teacher-summary-blue {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+.teacher-summary-green {
+  color: #16805c;
+  background: #eaf8f2;
+}
+.teacher-summary-amber {
+  color: #a56a0b;
+  background: #fff7e5;
+}
+.teacher-summary-red {
+  color: #bd4a55;
+  background: #fff0f1;
+}
+.teacher-summary-stat h2 {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+}
+.teacher-summary-value {
+  font-size: 28px;
+  font-weight: 650;
+  margin-block: 6px;
+}
+.teacher-summary-muted {
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.7;
+  margin-top: 5px;
+}
+.teacher-summary-strip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: var(--sidebar);
+  color: white;
+  padding: 20px;
+  border-radius: 11px;
+}
+.teacher-summary-strip > svg {
+  color: var(--sidebar-highlight);
+  flex-shrink: 0;
+}
+.teacher-summary-strip h2 {
+  font-size: 10px;
+  color: #b9cfff;
+}
+.teacher-summary-strip p {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.teacher-summary-strip-help {
+  flex: 1;
+  color: #b9cfff;
+  font-size: 11px;
+  text-align: center;
+}
+.teacher-summary-participation {
+  border-left: 1px solid #ffffff25;
+  padding-left: 20px;
+}
+.teacher-summary-widgets {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 20px;
+}
+.teacher-summary-distribution,
+.teacher-summary-activity {
+  padding: 23px;
+}
+.teacher-summary h2 {
+  font-weight: 600;
+}
+.teacher-summary-panel header h2 {
+  font-size: 14px;
+}
+.teacher-summary-chart-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 30px;
+  padding: 28px 5px;
+}
+.teacher-summary-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+  border: 22px solid var(--muted);
+  border-radius: 50%;
+}
+.teacher-summary-chart strong {
+  font-size: 28px;
+}
+.teacher-summary-chart span {
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+.teacher-summary-chart-content dl {
+  flex: 1;
+  max-width: 260px;
+}
+.teacher-summary-chart-content dl > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding-block: 11px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+.teacher-summary-chart-content dt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.teacher-summary-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16805c;
+}
+.teacher-summary-dot-1 {
+  background: var(--primary);
+}
+.teacher-summary-dot-2 {
+  background: #d39722;
+}
+.teacher-summary-dot-3 {
+  background: #bd4a55;
+}
+.teacher-summary-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px 15px;
+}
+.teacher-summary-empty h3 {
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 14px;
+}
+.teacher-summary-empty p {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  line-height: 1.8;
+  max-width: 370px;
+  margin-top: 8px;
+}
+.teacher-summary-activity .teacher-summary-empty {
+  min-height: 215px;
+}
+.teacher-summary-attention > header {
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.teacher-summary-badge {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  padding: 5px 9px;
+  border-radius: 20px;
+}
+.teacher-summary-table-scroll {
+  overflow-x: auto;
+}
+.teacher-summary table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+.teacher-summary th {
+  padding: 14px 20px;
+  background: #f8faff;
+  text-align: left;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  border-block: 1px solid var(--border);
+}
+.teacher-summary-notice {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+.teacher-summary-notice svg {
+  flex-shrink: 0;
+}
+@media (max-width: 1199px) {
+  .teacher-summary-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .teacher-summary-chart-content {
+    flex-direction: column;
+  }
+  .teacher-summary-chart-content dl {
+    width: 100%;
+  }
+}
+@media (max-width: 767px) {
+  .teacher-summary-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .teacher-summary-widgets {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .teacher-summary-strip {
+    flex-wrap: wrap;
+  }
+  .teacher-summary-strip-help {
+    flex-basis: 100%;
+    text-align: left;
+    order: 1;
+  }
+  .teacher-summary-participation {
+    margin-left: auto;
+  }
+  .teacher-summary-attention > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+@media (max-width: 420px) {
+  .teacher-summary-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .teacher-summary-actions {
+    flex-wrap: wrap;
+  }
+}

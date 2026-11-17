@@ -1,0 +1,103 @@
+.teacher-courses {
+  display: grid;
+  gap: 24px;
+}
+.teacher-courses-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.teacher-courses-heading > div > p:last-child:not(.teacher-courses-help) {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  line-height: 1.7;
+  margin-top: 9px;
+}
+.teacher-courses-heading > div:last-child {
+  text-align: right;
+}
+.teacher-courses-help {
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.7;
+  margin-top: 7px;
+}
+.teacher-courses-panel {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: white;
+  box-shadow:
+    0 3px 5px rgb(24 36 59 / 2%),
+    0 8px 24px rgb(24 36 59 / 3%);
+}
+.teacher-courses-panel > header {
+  padding: 23px;
+  border-bottom: 1px solid var(--border);
+}
+.teacher-courses-panel h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.teacher-courses-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  padding: 35px 24px;
+  text-align: center;
+}
+.teacher-courses-icon {
+  display: grid;
+  place-items: center;
+  width: 65px;
+  height: 65px;
+  border-radius: 18px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  margin-bottom: 20px;
+}
+.teacher-courses-empty h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.teacher-courses-empty p {
+  max-width: 400px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted-foreground);
+  margin-block: 10px 18px;
+}
+.teacher-courses-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  font-size: 10px;
+}
+.teacher-courses-notice {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.teacher-courses-notice svg {
+  flex-shrink: 0;
+}
+@media (max-width: 767px) {
+  .teacher-courses-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .teacher-courses-heading > div:last-child {
+    text-align: left;
+  }
+}

@@ -1,9 +1,9 @@
 export const navigation = [
-  { path: '/dashboard', label: 'Vista general', icon: 'dashboard' },
+  { path: '/dashboard', label: 'Resumen', icon: 'dashboard' },
+  { path: '/pipelines', label: 'Pipelines', icon: 'pipelines' },
   { path: '/projects', label: 'Proyectos', icon: 'projects' },
   { path: '/my-rubric', label: 'Mi rúbrica', icon: 'rubrics' },
-  { path: '/feedback', label: 'Retroalimentación', icon: 'feedback' },
-  { path: '/practice', label: 'Práctica y refuerzo', icon: 'practice' },
+  { path: '/practice', label: 'Mis tests', icon: 'practice' },
   { path: '/notifications', label: 'Notificaciones', icon: 'notifications' },
   { path: '/profile', label: 'Mi perfil', icon: 'settings' },
 ] as const;
@@ -16,8 +16,9 @@ export const teacherRoutes = [
 ] as const;
 export const teacherNavigation = [
   { path: '/teacher/dashboard', label: 'Resumen', icon: 'dashboard' },
+
   {
-    path: '/teacher/dashboard#course-selector',
+    path: '/teacher/courses',
     label: 'Mis cursos',
     icon: 'courses',
   },

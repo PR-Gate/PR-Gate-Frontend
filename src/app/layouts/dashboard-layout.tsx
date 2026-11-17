@@ -1,5 +1,6 @@
 import {
   Bell,
+  GitBranch,
   BookOpen,
   ChevronRight,
   ChevronsUpDown,
@@ -9,7 +10,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  MessageSquareText,
   ShieldCheck,
   Sparkles,
   X,
@@ -26,9 +26,9 @@ import { useUiStore } from '@/shared/stores/ui.store';
 import { Button } from '@/shared/components/ui/button';
 import { navigation, teacherNavigation } from '../config/routes.config';
 const icons = {
+  pipelines: GitBranch,
   dashboard: LayoutDashboard,
   projects: FolderKanban,
-  feedback: MessageSquareText,
   practice: Sparkles,
   notifications: Bell,
   courses: BookOpen,
@@ -56,6 +56,7 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
             '/teacher/evaluations',
             '/teacher/rubrics',
             '/teacher/students',
+            '/teacher/courses',
           ].includes(item.path) || user?.roles.includes('TEACHER'),
       )
     : navigation.filter(

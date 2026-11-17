@@ -1,9 +1,23 @@
 import { Link } from 'react-router';
+import { lazy, Suspense } from 'react';
 import { ArrowRight, FolderKanban, ShieldCheck } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { useAuth } from '@/shared/services/auth/auth-context';
+const StudentDashboardPage = lazy(async () => ({
+  default: (await import('@/features/metrics')).StudentDashboardPage,
+}));
 export function DashboardPage() {
   const { user } = useAuth();
+  if (
+    user?.roles.includes('STUDENT') &&
+    !user.roles.some((role) => role === 'TEACHER' || role === 'ADMIN')
+  ) {
+    return (
+      <Suspense fallback={<p role="status">Cargando resumen…</p>}>
+        <StudentDashboardPage />
+      </Suspense>
+    );
+  }
   return (
     <section>
       <p className="eyebrow">VISTA GENERAL</p>
