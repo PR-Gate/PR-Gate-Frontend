@@ -52,6 +52,7 @@ export interface SelectionPage {
   hasNext: boolean;
 }
 export interface CourseEnrollment {
+  studentName?: string | null;
   id: string;
   courseId: string;
   studentId: string;
@@ -64,6 +65,10 @@ export interface EnrollmentPage {
   hasNext: boolean;
 }
 export interface RepositoryProjectsRepository {
+  projectDetails(projectId: string, signal?: AbortSignal): Promise<CourseProject & { courseId: string; createdAt: string }>;
+  courseProjects(courseId: string, page: number, signal?: AbortSignal): Promise<Omit<CoursePage, 'items'> & { items: CourseProject[] }>;
+  createCourseProject(courseId: string, input: { name: string; description: string }): Promise<{ id: string }>;
+  linkOrganization(projectId: string, organizationLogin: string): Promise<void>;
   courses(page: number, signal?: AbortSignal): Promise<CoursePage>;
   catalog(page: number, signal?: AbortSignal): Promise<CoursePage>;
   repositories(
@@ -94,4 +99,12 @@ export interface RepositoryProjectsRepository {
     decision: 'APPROVE' | 'REJECT',
   ): Promise<CourseEnrollment>;
   ownEnrollments(page: number, signal?: AbortSignal): Promise<EnrollmentPage>;
+}
+
+export interface CourseProject {
+  id: string;
+  name: string;
+  description: string;
+  leaderId: string | null;
+  organizationLogin: string | null;
 }

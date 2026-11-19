@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { EvaluationContext } from '@/features/metrics/presentation/hooks/use-evaluation';
 import { Toaster } from 'sonner';
 import { ProjectsContext } from '@/features/projects/presentation/hooks/projects-context';
 import { createQueryClient } from '../config/query-client.config';
@@ -31,7 +32,9 @@ export function AppProviders({
                     <RepositoryProjectsContext.Provider
                       value={dependencies.repositoryProjects}
                     >
-                      {children}
+                      <EvaluationContext.Provider value={dependencies.evaluation}>
+                        {children}
+                      </EvaluationContext.Provider>
                     </RepositoryProjectsContext.Provider>
                   </GitHubLinkContext.Provider>
                 </StudentContext.Provider>

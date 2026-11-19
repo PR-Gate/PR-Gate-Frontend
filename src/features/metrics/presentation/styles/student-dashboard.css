@@ -44,8 +44,11 @@
 }
 .student-summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--student-summary-columns, 4), minmax(0, 1fr));
   gap: 16px;
+}
+.student-summary-grid--technical {
+  --student-summary-columns: 3;
 }
 .student-summary-card {
   padding: 23px 20px;
@@ -309,7 +312,7 @@
   color: var(--muted-foreground);
 }
 @media (max-width: 1199px) {
-  .student-summary-grid {
+.student-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .student-widget-grid {

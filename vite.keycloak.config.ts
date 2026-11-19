@@ -15,6 +15,7 @@ export default mergeConfig(base, {
     port: 5173,
     strictPort: true,
     proxy: {
+      '/api/v1/pipeline-runs': { target: 'http://localhost:8082', changeOrigin: true },
       '/api/v1': { target: 'http://localhost:8083', changeOrigin: true },
       '/api': sessionAudit.proxy,
     },

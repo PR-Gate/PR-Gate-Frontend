@@ -1,6 +1,18 @@
 import type { RepositoryProjectsRepository } from '../../domain/repository-project';
 export class RepositoryProjectsUseCases {
   constructor(private readonly repository: RepositoryProjectsRepository) {}
+  projectDetails(projectId: string, signal?: AbortSignal) {
+    return this.repository.projectDetails(projectId, signal);
+  }
+  courseProjects(courseId: string, page: number, signal?: AbortSignal) {
+    return this.repository.courseProjects(courseId, page, signal);
+  }
+  createCourseProject(courseId: string, input: { name: string; description: string }) {
+    return this.repository.createCourseProject(courseId, input);
+  }
+  linkOrganization(projectId: string, organizationLogin: string) {
+    return this.repository.linkOrganization(projectId, organizationLogin);
+  }
   courses(page: number, signal?: AbortSignal) {
     return this.repository.courses(page, signal);
   }

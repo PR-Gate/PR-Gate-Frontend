@@ -1,4 +1,6 @@
 import { createHttpClient } from '@/shared/services/http/axios.config';
+import { EvaluationApiService } from '@/features/metrics/infrastructure/services/evaluation-api.service';
+import { EvaluationUseCases } from '@/features/metrics/application/use-cases/evaluation.use-cases';
 import { ProjectApiService } from '@/features/projects/infrastructure/services/project-api.service';
 import { ProjectRepositoryImpl } from '@/features/projects/infrastructure/repositories/project.repository.impl';
 import { GetProjectsUseCase } from '@/features/projects/application/use-cases/get-projects.use-case';
@@ -72,6 +74,8 @@ export function createDependencies(
     ),
   );
   return {
+    evaluation: new EvaluationUseCases(new EvaluationApiService(createHttpClient(baseUrl,
+      () => auth.getAccessToken(), () => auth.expire(), true, { requireAccessToken: true, timeoutMs: 150_000 }))),
     repositoryProjects: new RepositoryProjectsUseCases(
       new RepositoryProjectsApi(
         createHttpClient(

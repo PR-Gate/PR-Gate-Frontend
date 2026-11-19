@@ -5,8 +5,12 @@ import { formatStudentValue } from '../utils/student-overview-format';
 
 export function StudentSummaryCards({
   overview,
+  showGrade = true,
+  gradeLabel = 'Calificación actual',
 }: {
   overview?: StudentOverview;
+  showGrade?: boolean;
+  gradeLabel?: string;
 }) {
   const projects = overview?.projects;
   const pipelines = overview?.pipelines;
@@ -21,7 +25,7 @@ export function StudentSummaryCards({
       detail:
         projects?.active != null && projects.completed != null
           ? `${formatStudentValue(projects.active)} activos · ${formatStudentValue(projects.completed)} finalizados`
-          : 'Información pendiente',
+          : projects?.total != null ? 'Proyectos a los que tienes acceso' : 'Información pendiente',
     },
     {
       label: 'Pipelines recientes',
@@ -42,12 +46,14 @@ export function StudentSummaryCards({
           ? `${formatStudentValue(gates.passed)} / ${formatStudentValue(gates.total)}`
           : '—',
       detail:
-        gates?.requiringCorrection != null
+        gates?.total === 0
+          ? 'Sin resultados recibidos'
+          : gates?.requiringCorrection != null
           ? `${formatStudentValue(gates.requiringCorrection)} requieren corrección`
           : 'Información pendiente',
     },
     {
-      label: 'Calificación actual',
+      label: gradeLabel,
       icon: ClipboardCheck,
       tone: 'green',
       value: formatStudentValue(grade?.value),
@@ -58,10 +64,10 @@ export function StudentSummaryCards({
   ];
   return (
     <div
-      className="student-summary-grid"
+      className={showGrade ? 'student-summary-grid' : 'student-summary-grid student-summary-grid--technical'}
       aria-label="Indicadores del estudiante"
     >
-      {cards.map(({ label, icon: Icon, tone, value, detail }) => (
+      {(showGrade ? cards : cards.slice(0, 3)).map(({ label, icon: Icon, tone, value, detail }) => (
         <article className="student-panel student-summary-card" key={label}>
           <span className={`student-icon student-icon-${tone}`}>
             <Icon size={20} aria-hidden="true" />

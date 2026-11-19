@@ -1,8 +1,37 @@
-import { BookOpen, Clock3, Info } from 'lucide-react';
+import { useState, type FormEvent } from 'react';
 import { Button } from '@/shared/components/ui/button';
+import { useRepositoryProjects } from '../hooks/use-repository-projects';
 import '../styles/teacher-courses.css';
 
 export function TeacherCoursesPage() {
+  const [creating, setCreating] = useState(false);
+  const [notice, setNotice] = useState('');
+  const { courses, createCourse } = useRepositoryProjects(false, 0, '');
+  const items = courses.data?.pages.flatMap((page) => page.items) ?? [];
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const fields = new FormData(form);
+    const name = String(fields.get('name')).trim();
+    const section = String(fields.get('section')).trim();
+    const academicPeriod = String(fields.get('academicPeriod')).trim();
+    if (!name || !section || !academicPeriod) {
+      setNotice('Completa los tres campos del curso.');
+      return;
+    }
+    setNotice('');
+    createCourse.mutate(
+      { name, section, academicPeriod },
+      {
+        onSuccess: () => {
+          setCreating(false);
+          setNotice('Curso creado.');
+        },
+      },
+    );
+  }
+
   return (
     <section
       className="teacher-courses"
@@ -14,48 +43,126 @@ export function TeacherCoursesPage() {
           <h1 className="page-title" id="teacher-courses-heading">
             Mis cursos
           </h1>
-          <p>Gestiona cursos, equipos y proyectos académicos.</p>
+          <p>Consulta y crea los cursos que tienes a cargo.</p>
         </div>
-        <div>
-          <Button disabled aria-describedby="create-course-help">
-            <BookOpen size={16} aria-hidden="true" />
+        {!creating && (
+          <Button
+            onClick={() => {
+              createCourse.reset();
+              setNotice('');
+              setCreating(true);
+            }}
+          >
             Crear curso
           </Button>
-          <p className="teacher-courses-help" id="create-course-help">
-            Disponible al integrar la gestión de cursos.
-          </p>
-        </div>
+        )}
       </header>
+      {notice && <p role="status">{notice}</p>}
+      {creating && (
+        <form
+          onSubmit={submit}
+          className="teacher-courses-panel grid gap-4 p-6"
+        >
+          <h2 className="font-semibold">Nuevo curso</h2>
+          <fieldset
+            disabled={createCourse.isPending}
+            className="grid gap-4 sm:grid-cols-3"
+          >
+            <label className="grid gap-2">
+              Nombre
+              <input
+                name="name"
+                required
+                maxLength={150}
+                className="rounded border p-2"
+              />
+            </label>
+            <label className="grid gap-2">
+              Sección
+              <input
+                name="section"
+                required
+                maxLength={50}
+                className="rounded border p-2"
+              />
+            </label>
+            <label className="grid gap-2">
+              Periodo académico
+              <input
+                name="academicPeriod"
+                required
+                maxLength={30}
+                placeholder="2026-2"
+                className="rounded border p-2"
+              />
+            </label>
+          </fieldset>
+          {createCourse.isError && (
+            <p role="alert">
+              No se pudo crear el curso. Revisa los datos e inténtalo
+              nuevamente.
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" disabled={createCourse.isPending}>
+              {createCourse.isPending ? 'Guardando…' : 'Guardar curso'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={createCourse.isPending}
+              onClick={() => {
+                setCreating(false);
+                setNotice('');
+              }}
+            >
+              Cancelar
+            </Button>
+          </div>
+        </form>
+      )}
       <section
-        className="teacher-courses-panel"
+        className="teacher-courses-panel p-6"
         aria-labelledby="teacher-course-list-heading"
       >
-        <header>
-          <h2 id="teacher-course-list-heading">Tus cursos</h2>
-          <p className="teacher-courses-help">
-            Consulta las secciones, estudiantes, equipos y proyectos de cada
-            curso.
+        <h2 className="font-semibold" id="teacher-course-list-heading">
+          Tus cursos
+        </h2>
+        {courses.isPending && <p role="status">Cargando cursos…</p>}
+        {courses.isError && (
+          <div role="alert" className="mt-4 flex flex-wrap items-center gap-3">
+            <p>No se pudieron cargar los cursos.</p>
+            <Button variant="outline" onClick={() => void courses.refetch()}>
+              Reintentar
+            </Button>
+          </div>
+        )}
+        {courses.isSuccess && items.length === 0 && (
+          <p className="mt-4">
+            Aún no tienes cursos. Crea el primero para empezar.
           </p>
-        </header>
-        <div className="teacher-courses-empty">
-          <span className="teacher-courses-icon">
-            <BookOpen size={32} strokeWidth={1.5} aria-hidden="true" />
-          </span>
-          <h3>Tus cursos aparecerán aquí</h3>
-          <p>
-            Cuando se conecte la información académica, podrás consultar los
-            cursos que tienes a cargo y acceder a su detalle.
-          </p>
-          <span className="teacher-courses-badge">
-            <Clock3 size={13} aria-hidden="true" />
-            Información pendiente
-          </span>
-        </div>
+        )}
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+          {items.map((course) => (
+            <li key={course.id} className="rounded-lg border p-4">
+              <h3 className="font-semibold">{course.name}</h3>
+              <p className="text-sm text-muted-foreground">
+                Sección {course.section} · Periodo {course.academicPeriod}
+              </p>
+            </li>
+          ))}
+        </ul>
+        {courses.hasNextPage && (
+          <Button
+            className="mt-4"
+            variant="outline"
+            disabled={courses.isFetchingNextPage}
+            onClick={() => void courses.fetchNextPage()}
+          >
+            Cargar más cursos
+          </Button>
+        )}
       </section>
-      <p className="teacher-courses-notice">
-        <Info size={15} aria-hidden="true" />
-        El listado estará disponible cuando se integre el servicio de cursos.
-      </p>
     </section>
   );
 }

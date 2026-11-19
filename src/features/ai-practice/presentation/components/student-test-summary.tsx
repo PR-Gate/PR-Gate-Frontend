@@ -1,6 +1,6 @@
 import { Check, ClipboardCheck, Clock3 } from 'lucide-react';
 
-export function StudentTestSummary() {
+export function StudentTestSummary({ values }: { values?: [string, string, string] }) {
   return (
     <div
       className="student-tests-summary"
@@ -10,7 +10,7 @@ export function StudentTestSummary() {
         { label: 'Tests pendientes', icon: Clock3, tone: 'amber' },
         { label: 'Tests completados', icon: Check, tone: 'green' },
         { label: 'Promedio de tests', icon: ClipboardCheck, tone: 'blue' },
-      ].map(({ label, icon: Icon, tone }) => (
+      ].map(({ label, icon: Icon, tone }, index) => (
         <article className="student-tests-panel student-tests-stat" key={label}>
           <span className={`student-tests-icon student-tests-${tone}`}>
             <Icon size={20} aria-hidden="true" />
@@ -19,11 +19,11 @@ export function StudentTestSummary() {
             <h2>{label}</h2>
             <p
               className="student-tests-value"
-              aria-label="Información pendiente"
+              aria-label={values ? undefined : 'Información pendiente'}
             >
-              —
+              {values?.[index] ?? '—'}
             </p>
-            <p className="student-tests-muted">Información pendiente</p>
+            {!values && <p className="student-tests-muted">Información pendiente</p>}
           </div>
         </article>
       ))}

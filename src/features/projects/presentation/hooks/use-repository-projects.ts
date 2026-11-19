@@ -13,7 +13,6 @@ export function useRepositoryProjects(
   open: boolean,
   page: number,
   course: string,
-  organization = '',
 ) {
   const cases = useContext(RepositoryProjectsContext);
   if (!cases) throw new Error('RepositoryProjectsContext es obligatorio');
@@ -27,15 +26,6 @@ export function useRepositoryProjects(
     queryFn: ({ pageParam, signal }) => cases.courses(pageParam, signal),
     getNextPageParam: (last) => (last.hasNext ? last.page + 1 : undefined),
   });
-  const repos = useInfiniteQuery({
-    queryKey: [...root, 'github', organization],
-    enabled: student && open,
-    initialPageParam: 1,
-    queryFn: ({ pageParam, signal }) =>
-      cases.repositories(pageParam, signal, organization),
-    getNextPageParam: (last) => (last.hasNext ? last.page + 1 : undefined),
-    retry: false,
-  });
   const organizations = useInfiniteQuery({
     queryKey: [...root, 'github-organizations'],
     enabled: student && open,
@@ -44,10 +34,10 @@ export function useRepositoryProjects(
     getNextPageParam: (last) => (last.hasNext ? last.page + 1 : undefined),
     retry: false,
   });
-  const selections = useQuery({
-    queryKey: [...root, 'selections', page],
-    enabled: student,
-    queryFn: ({ signal }) => cases.selections(page, signal),
+  const projects = useQuery({
+    queryKey: [...root, 'projects', course, page],
+    enabled: student && Boolean(course),
+    queryFn: ({ signal }) => cases.courseProjects(course, page, signal),
   });
   const catalog = useInfiniteQuery({
     queryKey: [...root, 'catalog'],
@@ -68,10 +58,18 @@ export function useRepositoryProjects(
     enabled: !student && Boolean(course),
     queryFn: ({ signal }) => cases.enrollments(course, page, signal),
   });
-  const invalidate = () => client.invalidateQueries({ queryKey: root });
-  const select = useMutation({
-    mutationFn: (input: Parameters<RepositoryProjectsUseCases['select']>[0]) =>
-      cases.select(input),
+  const invalidate = () => Promise.all([
+    client.invalidateQueries({ queryKey: root }),
+    client.invalidateQueries({ queryKey: ['student-project-catalog', user?.id] }),
+  ]);
+  const createProject = useMutation({
+    mutationFn: (input: { name: string; description: string }) =>
+      cases.createCourseProject(course, input),
+    onSuccess: invalidate,
+  });
+  const linkOrganization = useMutation({
+    mutationFn: (input: { projectId: string; organizationLogin: string }) =>
+      cases.linkOrganization(input.projectId, input.organizationLogin),
     onSuccess: invalidate,
   });
   const createCourse = useMutation({
@@ -91,14 +89,15 @@ export function useRepositoryProjects(
   });
   return {
     student,
+    userId: user?.id,
     courses,
-    repos,
     organizations,
-    selections,
+    projects,
     catalog,
     admissions,
     pending,
-    select,
+    createProject,
+    linkOrganization,
     createCourse,
     enroll,
     decide,

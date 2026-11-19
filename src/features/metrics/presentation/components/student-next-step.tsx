@@ -1,8 +1,12 @@
 import { Activity } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
+import { Link } from 'react-router';
 import type { StudentOverview } from '../../domain/entities/student-overview.entity';
 
-export function StudentNextStep({ overview }: { overview?: StudentOverview }) {
+export function StudentNextStep({ overview, action }: {
+  overview?: StudentOverview;
+  action?: { to: string; label: string };
+}) {
   const recommendation = overview?.recommendation;
   return (
     <section
@@ -24,6 +28,7 @@ export function StudentNextStep({ overview }: { overview?: StudentOverview }) {
         </p>
       </div>
       <div className="student-next-step-action">
+        {action ? <Button asChild><Link to={action.to}>{action.label}</Link></Button> : <>
         <Button disabled aria-describedby="student-recommendation-action-help">
           Ver cómo mejorar
         </Button>
@@ -33,6 +38,7 @@ export function StudentNextStep({ overview }: { overview?: StudentOverview }) {
         >
           Orientación aún no disponible.
         </p>
+        </>}
       </div>
     </section>
   );

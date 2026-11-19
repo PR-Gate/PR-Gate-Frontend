@@ -1,34 +1,24 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { FolderGit2, Plus, ExternalLink } from 'lucide-react';
+import { BookOpen, FolderKanban, GitBranch, Plus } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog } from '@/shared/components/ui/dialog';
+import { Badge } from '@/shared/components/ui/badge';
+import { HttpError } from '@/shared/services/http/http-error';
 import { useRepositoryProjects } from '../hooks/use-repository-projects';
 
-function hasErrorCode(error: unknown, code: string) {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    error.code === code
-  );
-}
-
 export default function RepositoryProjectsPage() {
-  const [open, setOpen] = useState(false);
+  const [projectToLink, setProjectToLink] = useState<string>();
   const [page, setPage] = useState(0);
   const [course, setCourse] = useState('');
-  const [repository, setRepository] = useState<number | null>(null);
   const [organization, setOrganization] = useState('');
   const [notice, setNotice] = useState('');
-  const query = useRepositoryProjects(open, page, course, organization);
+  const query = useRepositoryProjects(Boolean(projectToLink), page, course);
   const organizations =
     query.organizations.data?.pages.flatMap((p) => p.items) ?? [];
   const courses = query.courses.data?.pages.flatMap((p) => p.items) ?? [];
-  const repos = query.repos.data?.pages.flatMap((p) => p.items) ?? [];
   const catalog = query.catalog.data?.pages.flatMap((p) => p.items) ?? [];
   const admissions = query.admissions.data?.pages.flatMap((p) => p.items) ?? [];
-  const picked = repos.find((r) => r.id === repository);
   const field =
     'mt-2 w-full rounded-lg border border-border bg-white p-3 text-sm focus:outline-primary';
   function moreCourses() {
@@ -53,21 +43,10 @@ export default function RepositoryProjectsPage() {
           <h1 className="page-title">Proyectos</h1>
           <p className="mt-3 text-sm text-muted-foreground">
             {query.student
-              ? 'Asocia un repositorio público de tu GitHub a uno de tus cursos.'
+              ? 'Entra a un curso para crear tu proyecto y vincular su organización de GitHub.'
               : 'Crea tus cursos y revisa las solicitudes de estudiantes.'}
           </p>
         </div>
-        {query.student && (
-          <Button
-            onClick={() => {
-              query.select.reset();
-              setOpen(true);
-            }}
-          >
-            <FolderGit2 size={18} aria-hidden="true" />
-            Seleccionar proyecto
-          </Button>
-        )}
       </div>
       {notice && (
         <p
@@ -99,74 +78,113 @@ export default function RepositoryProjectsPage() {
       )}
       {query.student ? (
         <>
-          <h2 className="mt-8 text-lg font-semibold">Mis proyectos</h2>
-          {query.selections.isPending && (
-            <p role="status" className="my-4">
-              Consultando tus proyectos…
-            </p>
+          <div className="mt-8 rounded-xl border border-border bg-card p-5 shadow-sm">
+          <label className="block text-sm font-semibold">
+            <span className="flex items-center gap-2"><BookOpen size={17} className="text-primary" aria-hidden="true" />Mis cursos</span>
+            <select className={field} value={course} disabled={query.createProject.isPending} onChange={(event) => {
+              setCourse(event.target.value);
+              setPage(0);
+              query.createProject.reset();
+            }}>
+              <option value="">Selecciona un curso</option>
+              {courses.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} · {item.section} · {item.academicPeriod}
+                </option>
+              ))}
+            </select>
+          </label>
+          {moreCourses()}
+          </div>
+          {query.courses.isSuccess && !courses.length && (
+            <p className="my-4 text-sm">Aquí aparecerán los cursos en los que tienes acceso aprobado.</p>
           )}
-          {query.selections.isError && (
-            <p role="alert" className="my-4 text-sm text-red-700">
-              No se pudieron consultar tus proyectos.{' '}
-              <Button
-                variant="outline"
-                onClick={() => void query.selections.refetch()}
-              >
-                Reintentar
-              </Button>
-            </p>
-          )}
-          {query.selections.isSuccess &&
-            !query.selections.data.items.length && (
-              <p className="my-5 rounded-xl border border-border bg-white p-6 text-sm text-muted-foreground">
-                Todavía no tienes repositorios asociados. Pulsa «Seleccionar
-                proyecto» para elegir uno.
-              </p>
-            )}
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            {query.selections.data?.items.map((item) => (
-              <article
-                key={item.projectId}
-                className="rounded-xl border border-border bg-white p-6"
-              >
-                <h3 className="font-semibold">{item.repositoryFullName}</h3>
-                <p className="my-3 text-sm text-muted-foreground">
-                  {item.courseName} · {item.section} · {item.academicPeriod}
+          {course && (
+            <section key={course} className="mt-6 space-y-4">
+              <form className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const form = event.currentTarget;
+                  const data = new FormData(form);
+                  const name = String(data.get('name')).trim();
+                  if (!name) return;
+                  query.createProject.mutate({ name, description: String(data.get('description')).trim() }, {
+                    onSuccess: (project) => {
+                      form.reset();
+                      setPage(0);
+                      setNotice('Proyecto creado. Puedes vincular la organización ahora o desde el listado.');
+                      setOrganization('');
+                      query.linkOrganization.reset();
+                      setProjectToLink(project.id);
+                    },
+                  });
+                }}>
+                <h2 className="flex items-center gap-2 text-lg font-semibold"><Plus size={19} className="text-primary" aria-hidden="true" />Crear proyecto</h2>
+                <fieldset disabled={query.createProject.isPending} className="space-y-3">
+                  <label className="block text-sm">
+                    Nombre del proyecto
+                    <input name="name" required maxLength={150} className={field} />
+                  </label>
+                  <label className="block text-sm">
+                    Descripción (opcional)
+                    <textarea name="description" maxLength={2000} className={field} />
+                  </label>
+                  <Button type="submit"><Plus size={16} />Crear proyecto</Button>
+                </fieldset>
+                {query.createProject.isError && (
+                  <p role="alert" className="text-sm text-red-700">
+                    {query.createProject.error instanceof HttpError && query.createProject.error.status === 409
+                      ? 'Ya perteneces a un proyecto en este curso.'
+                      : 'No se pudo crear el proyecto. Comprueba que tienes acceso aprobado al curso.'}
+                  </p>
+                )}
+              </form>
+              <h2 className="text-lg font-semibold">Proyectos del curso</h2>
+              {query.projects.isPending && <p role="status">Consultando proyectos…</p>}
+              {query.projects.isError && (
+                <p role="alert">No se pudieron consultar los proyectos.{' '}
+                  <Button variant="outline" onClick={() => void query.projects.refetch()}>Reintentar</Button>
                 </p>
-                <a
-                  href={item.repositoryUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-primary"
-                >
-                  Ver repositorio público
-                  <ExternalLink size={14} />
-                </a>
-              </article>
-            ))}
-          </div>
-          <div className="my-4 flex gap-3">
-            <Button
-              variant="outline"
-              disabled={!page}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Anterior
-            </Button>
-            <Button
-              variant="outline"
-              disabled={!query.selections.data?.hasNext}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Siguiente
-            </Button>
-          </div>
+              )}
+              {query.projects.isSuccess && !query.projects.data.items.length && <p>Aún no hay proyectos en este curso.</p>}
+              {query.projects.data?.items.map((item) => (
+                <article key={item.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-sm">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary"><FolderKanban size={19} aria-hidden="true" /></span>
+                    <div className="min-w-0 space-y-1">
+                      <h3 className="break-words font-semibold"><Link className="hover:text-primary hover:underline" to={`/projects/${item.id}`}>{item.name}</Link></h3>
+                      {item.description && <p className="break-words text-sm text-muted-foreground">{item.description}</p>}
+                      <Badge>{item.organizationLogin ?? 'Organización por vincular'}</Badge>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                  <Button asChild variant="outline">
+                    <Link to={`/pipelines?projectId=${encodeURIComponent(item.id)}`}><GitBranch size={16} />Ejecuciones CI/CD</Link>
+                  </Button>
+                  {item.leaderId === query.userId && !item.organizationLogin && (
+                    <Button variant="outline" onClick={() => {
+                      setOrganization('');
+                      query.linkOrganization.reset();
+                      setProjectToLink(item.id);
+                    }}>Vincular organización</Button>
+                  )}
+                  </div>
+                </article>
+              ))}
+              {(page > 0 || query.projects.data?.hasNext) && (
+                <div className="flex gap-3">
+                  <Button variant="outline" disabled={page === 0} onClick={() => setPage(page - 1)}>Anterior</Button>
+                  <Button variant="outline" disabled={!query.projects.data?.hasNext} onClick={() => setPage(page + 1)}>Siguiente</Button>
+                </div>
+              )}
+            </section>
+          )}
           <details className="mt-8 rounded-xl border border-border bg-white p-6">
             <summary className="cursor-pointer font-semibold">
               ¿No aparece tu curso? Solicitar acceso
             </summary>
             <p className="my-4 text-sm text-muted-foreground">
-              Solo podrás seleccionar un curso cuando el docente apruebe tu
+              Podrás entrar al curso cuando el docente apruebe tu
               solicitud.
             </p>
             {query.catalog.isError && (
@@ -343,7 +361,7 @@ export default function RepositoryProjectsPage() {
               key={item.id}
               className="my-4 rounded-xl border border-border bg-white p-5"
             >
-              <p className="break-all text-sm">Estudiante: {item.studentId}</p>
+              <p className="break-words text-sm">Estudiante: {item.studentName?.trim() || 'Nombre no disponible'}</p>
               <p className="my-2 text-sm">
                 {item.status === 'PENDING'
                   ? 'Solicitud pendiente'
@@ -400,217 +418,49 @@ export default function RepositoryProjectsPage() {
           )}
         </>
       )}
-      <Dialog
-        open={open}
-        onOpenChange={(value) => {
-          if (!query.select.isPending) setOpen(value);
-        }}
-        title="Seleccionar proyecto"
-        description="Elige un repositorio de tu cuenta u organización autorizado para PR Gate y el curso de destino."
-      >
-        <form
-          className="space-y-5"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (!picked || !course || query.select.isPending) return;
-            query.select.mutate(
-              { courseId: course, owner: picked.owner, name: picked.name },
-              {
-                onSuccess: (result) => {
-                  setNotice(
-                    'Proyecto ' +
-                      result.repositoryFullName +
-                      ' asociado a ' +
-                      result.courseName +
-                      '.',
-                  );
-                  setOpen(false);
-                  setCourse('');
-                  setRepository(null);
-                  setPage(0);
-                },
-              },
-            );
-          }}
+      {projectToLink && (
+        <Dialog
+          open
+          onOpenChange={(open) => { if (!open && !query.linkOrganization.isPending) setProjectToLink(undefined); }}
+          title="Vincular organización de GitHub"
+          description="Elige la organización que contiene los repositorios del proyecto."
         >
-          <fieldset disabled={query.select.isPending}>
-            <legend className="mb-3 text-sm font-semibold">
-              1. Repositorio de GitHub
-            </legend>
-            <label className="mb-3 block text-sm font-semibold">
-              Cuenta u organización
-              <select
-                className={field}
-                value={organization}
-                onChange={(event) => {
-                  setOrganization(event.target.value);
-                  setRepository(null);
-                }}
-              >
-                <option value="">Mi cuenta de GitHub</option>
-                {organizations.map((item) => (
-                  <option key={item.id} value={item.login}>
-                    {item.login}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <p className="mb-3 text-sm text-muted-foreground">
-              Se consultan las organizaciones y repositorios accesibles con tu
-              autorización de GitHub. Los privados requieren instalar la App y
-              permitir esos repositorios.
+          {query.organizations.isPending && <p role="status">Consultando GitHub…</p>}
+          {query.organizations.isError && (
+            <p role="alert">
+              {query.organizations.error instanceof HttpError &&
+              query.organizations.error.code === 'GITHUB_REAUTHORIZATION_REQUIRED'
+                ? 'GitHub requiere renovar la autorización. Ve a '
+                : 'No se pudieron consultar tus organizaciones. Revisa el vínculo en '}
+              <Link to="/account" className="underline">tu cuenta</Link>.{' '}
+              <Button variant="outline" onClick={() => void query.organizations.refetch()}>Reintentar</Button>
             </p>
-            {query.organizations.isPending && (
-              <p role="status">Consultando organizaciones…</p>
-            )}
-            {query.organizations.isSuccess && !organizations.length && (
-              <p className="mb-3 text-sm text-muted-foreground">
-                No se encontraron organizaciones accesibles con tu autorización.
-              </p>
-            )}
-            {query.organizations.isError && (
-              <div role="alert" className="mb-3 text-sm text-red-700">
-                No se pudieron consultar las organizaciones.{' '}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void query.organizations.refetch()}
-                >
-                  Reintentar organizaciones
-                </Button>
-              </div>
-            )}
-            {query.organizations.hasNextPage && (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={query.organizations.isFetchingNextPage}
-                onClick={() => void query.organizations.fetchNextPage()}
-              >
-                Cargar más organizaciones
-              </Button>
-            )}
-            {query.repos.isPending && <p role="status">Consultando GitHub…</p>}
-            {query.repos.isError && (
-              <div role="alert" className="text-sm text-red-700">
-                {hasErrorCode(
-                  query.repos.error,
-                  'GITHUB_REAUTHORIZATION_REQUIRED',
-                )
-                  ? 'Renueva la autorización de GitHub en tu cuenta para consultar los repositorios.'
-                  : hasErrorCode(
-                        query.repos.error,
-                        'GITHUB_TOKEN_STORAGE_UNAVAILABLE',
-                      )
-                    ? 'El backend necesita configurar la clave de cifrado de GitHub.'
-                    : 'No se pudieron consultar los repositorios. Comprueba los permisos e instalación de la App y el límite de GitHub.'}{' '}
-                <Link to="/account" className="underline">
-                  Ver cuenta de GitHub
-                </Link>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void query.repos.refetch()}
-                >
-                  Reintentar
-                </Button>
-              </div>
-            )}
-            {query.repos.isSuccess && !repos.length && (
-              <p className="text-sm text-muted-foreground">
-                No hay repositorios accesibles en la cuenta u organización
-                seleccionada.
-              </p>
-            )}
-            <div className="max-h-60 space-y-2 overflow-y-auto">
-              {repos.map((repo) => (
-                <label
-                  key={repo.id}
-                  className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3"
-                >
-                  <input
-                    type="radio"
-                    name="repository"
-                    checked={repository === repo.id}
-                    onChange={() => setRepository(repo.id)}
-                    className="mt-1"
-                  />
-                  <span className="min-w-0 text-sm">
-                    <span className="block break-all font-semibold">
-                      {repo.fullName}
-                      {repo.privateRepository ? ' · Privado' : ' · Público'}
-                      {repo.archived ? ' · Archivado' : ''}
-                    </span>
-                    <span className="mt-1 block text-muted-foreground">
-                      {repo.description || 'Sin descripción'}
-                    </span>
-                  </span>
-                </label>
-              ))}
-            </div>
-            {query.repos.hasNextPage && (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={query.repos.isFetchingNextPage}
-                onClick={() => void query.repos.fetchNextPage()}
-              >
-                Cargar más repositorios
-              </Button>
-            )}
-          </fieldset>
-          <label className="block text-sm font-semibold">
-            2. Curso de destino
-            <select
-              required
-              value={course}
-              onChange={(event) => setCourse(event.target.value)}
-              className={field}
-              disabled={query.select.isPending || query.courses.isPending}
-            >
-              <option value="">Selecciona un curso aprobado</option>
-              {courses.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} · {c.section} · {c.academicPeriod}
-                </option>
-              ))}
+          )}
+          {query.organizations.isSuccess && !organizations.length && <p>No hay organizaciones disponibles para tu cuenta.</p>}
+          <label className="block text-sm">
+            Organización
+            <select className={field} value={organization} disabled={query.linkOrganization.isPending}
+              onChange={(event) => setOrganization(event.target.value)}>
+              <option value="">Selecciona una organización</option>
+              {organizations.map((item) => <option key={item.id} value={item.login}>{item.login}</option>)}
             </select>
           </label>
-          {moreCourses()}
-          {query.courses.isSuccess && !courses.length && (
-            <p className="text-sm text-muted-foreground">
-              Aún no tienes cursos aprobados. Cierra esta ventana y solicita
-              acceso a un curso.
-            </p>
+          {query.organizations.hasNextPage && (
+            <Button variant="outline" disabled={query.organizations.isFetchingNextPage}
+              onClick={() => void query.organizations.fetchNextPage()}>Cargar más organizaciones</Button>
           )}
-          {picked && course && (
-            <p className="rounded-lg bg-muted p-3 text-sm">
-              Se asociará <strong>{picked.fullName}</strong> al curso{' '}
-              <strong>{courses.find((c) => c.id === course)?.name}</strong>.
-              Podrás tener un proyecto activo por curso.
-            </p>
-          )}
-          {query.select.isError && (
-            <p role="alert" className="text-sm text-red-700">
-              No se pudo asociar el proyecto. Verifica la admisión al curso, que
-              tengas acceso al repositorio y que no tengas otro proyecto activo
-              en ese curso.
-            </p>
-          )}
-          <Button
-            type="submit"
-            disabled={
-              !picked ||
-              !course ||
-              query.select.isPending ||
-              query.courses.isError ||
-              query.repos.isError
-            }
-          >
-            {query.select.isPending ? 'Guardando…' : 'Confirmar selección'}
+          {query.linkOrganization.isError && <p role="alert">No se pudo vincular la organización. Puedes reintentarlo desde el proyecto.</p>}
+          <Button disabled={!organization || query.linkOrganization.isPending}
+            onClick={() => query.linkOrganization.mutate({ projectId: projectToLink, organizationLogin: organization }, {
+              onSuccess: () => {
+                setProjectToLink(undefined);
+                setNotice('Organización vinculada al proyecto.');
+              },
+            })}>
+            {query.linkOrganization.isPending ? 'Vinculando…' : 'Vincular organización'}
           </Button>
-        </form>
-      </Dialog>
+        </Dialog>
+      )}
     </section>
   );
 }

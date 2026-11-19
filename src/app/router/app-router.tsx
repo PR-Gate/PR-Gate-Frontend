@@ -61,7 +61,7 @@ export function createAppRouter(demo: boolean) {
               element: <DashboardLayout demo={demo} />,
               children: [
                 { index: true, element: <Navigate to="/dashboard" replace /> },
-                { path: '/dashboard', element: <DashboardPage /> },
+                { path: '/dashboard', element: <DashboardPage demo={demo} /> },
                 {
                   path: '/teacher/courses',
                   element: <TeacherOnlyRoute />,
@@ -83,7 +83,7 @@ export function createAppRouter(demo: boolean) {
                       index: true,
                       lazy: async () => ({
                         Component: (await import('@/features/cicd'))
-                          .PipelinesPage,
+                          [demo ? 'PipelinesPage' : 'LivePipelinesPage'],
                       }),
                     },
                   ],
@@ -91,8 +91,8 @@ export function createAppRouter(demo: boolean) {
                 {
                   path: '/quality-gate',
                   lazy: async () => ({
-                    Component: (await import('@/features/cicd'))
-                      .QualityGatesPage,
+                    Component: demo ? (await import('@/features/cicd')).QualityGatesPage
+                      : (await import('@/features/metrics')).EvaluationWorkspacePage,
                   }),
                 },
                 {
@@ -116,12 +116,7 @@ export function createAppRouter(demo: boolean) {
                       ? (
                           await import('@/features/projects/presentation/pages/project-detail.page')
                         ).default
-                      : () => (
-                          <ModulePlaceholder
-                            title="Detalle del proyecto"
-                            description="La consulta del proyecto está pendiente de conectar el servicio local de proyectos."
-                          />
-                        ),
+                      : (await import('@/features/projects/presentation/pages/live-project-detail.page')).default,
                   }),
                 },
                 {
@@ -132,7 +127,7 @@ export function createAppRouter(demo: boolean) {
                       index: true,
                       lazy: async () => ({
                         Component: (await import('@/features/cicd'))
-                          .PipelinesPage,
+                          [demo ? 'PipelinesPage' : 'LivePipelinesPage'],
                       }),
                     },
                   ],
@@ -140,8 +135,8 @@ export function createAppRouter(demo: boolean) {
                 {
                   path: '/projects/:projectId/quality-gates',
                   lazy: async () => ({
-                    Component: (await import('@/features/cicd'))
-                      .QualityGatesPage,
+                    Component: demo ? (await import('@/features/cicd')).QualityGatesPage
+                      : (await import('@/features/metrics')).EvaluationWorkspacePage,
                   }),
                 },
                 {
@@ -158,7 +153,7 @@ export function createAppRouter(demo: boolean) {
                     return {
                       Component: () => (
                         <RoleGuard roles={['STUDENT']}>
-                          <StudentTestsPage />
+                          <StudentTestsPage demo={demo} />
                         </RoleGuard>
                       ),
                     };
@@ -195,8 +190,9 @@ export function createAppRouter(demo: boolean) {
                           ? {
                               path: route.path,
                               lazy: async () => {
-                                const { TeacherRubricsPage } =
-                                  await import('@/features/rubrics');
+                                const TeacherRubricsPage = demo
+                                  ? (await import('@/features/rubrics/presentation/pages/rubrics.page')).default
+                                  : (await import('@/features/metrics')).EvaluationWorkspacePage;
                                 return {
                                   Component: () => (
                                     <TeacherOnlyRoute>
@@ -221,12 +217,19 @@ export function createAppRouter(demo: boolean) {
                                   };
                                 },
                               }
+                            : route.path === '/teacher/projects' && !demo
+                            ? {
+                                path: route.path,
+                                lazy: async () => ({
+                                  Component: (await import('@/features/projects/presentation/pages/teacher-projects.page')).TeacherProjectsPage,
+                                }),
+                              }
                             : {
                                 path: route.path,
                                 element: (
                                   <ModulePlaceholder
                                     title={route.title}
-                                    description="Herramientas docentes para acompañar y evaluar el aprendizaje basado en proyectos."
+                                    description="Los indicadores agregados todavía no están disponibles."
                                   />
                                 ),
                               },
@@ -255,7 +258,7 @@ export function createAppRouter(demo: boolean) {
                     element: (
                       <ModulePlaceholder
                         title={route.title}
-                        description="Administración de cuentas y configuración del espacio académico."
+                        description="La gestión de cuentas desde PRGate todavía no está disponible."
                       />
                     ),
                   })),
@@ -263,8 +266,9 @@ export function createAppRouter(demo: boolean) {
                 {
                   path: '/my-rubric',
                   lazy: async () => {
-                    const { StudentResultPage } =
-                      await import('@/features/rubrics');
+                    const StudentResultPage = demo
+                      ? (await import('@/features/rubrics/presentation/pages/student-rubric.page')).default
+                      : (await import('@/features/metrics')).EvaluationWorkspacePage;
                     return {
                       Component: () => (
                         <RoleGuard roles={['STUDENT']}>

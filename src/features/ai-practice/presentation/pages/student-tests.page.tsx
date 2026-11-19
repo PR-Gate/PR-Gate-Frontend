@@ -5,10 +5,12 @@ import { PendingStudentTests } from '../components/pending-student-tests';
 import { CompletedStudentTests } from '../components/completed-student-tests';
 import { StudentTestGuidance } from '../components/student-test-guidance';
 import '../styles/student-tests.css';
+import { LiveStudentTestsPage } from './live-student-tests.page';
 
 const state: StudentTestsState = { status: 'integration-pending' };
 
-export function StudentTestsPage() {
+export function StudentTestsPage({ demo = true }: { demo?: boolean }) {
+  if (!demo) return <LiveStudentTestsPage />;
   return (
     <section
       className="student-tests"

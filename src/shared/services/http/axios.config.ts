@@ -7,11 +7,11 @@ export function createHttpClient(
   getToken: () => Promise<string | undefined>,
   onUnauthorized: () => Promise<void>,
   withCredentials = false,
-  options: { requireAccessToken?: boolean } = {},
+  options: { requireAccessToken?: boolean; timeoutMs?: number } = {},
 ): HttpClient {
   const client = axios.create({
     baseURL,
-    timeout: 15_000,
+    timeout: options.timeoutMs ?? 15_000,
     withCredentials,
     headers: { Accept: 'application/json' },
   });

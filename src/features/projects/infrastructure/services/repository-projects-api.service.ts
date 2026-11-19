@@ -28,6 +28,7 @@ const selection = z.object({
   repositoryUrl: z.url(),
 });
 const enrollment = z.object({
+  studentName: z.string().nullish(),
   id: z.uuid(),
   courseId: z.uuid(),
   studentId: z.uuid(),
@@ -40,8 +41,32 @@ const page = <T extends z.ZodType>(item: T) =>
     size: z.number().int().positive(),
     hasNext: z.boolean(),
   });
+const courseProject = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  description: z.string(),
+  leaderId: z.uuid().nullable(),
+  organizationLogin: z.string().nullable(),
+});
 export class RepositoryProjectsApi implements RepositoryProjectsRepository {
   constructor(private readonly http: HttpClient) {}
+  async projectDetails(projectId: string, signal?: AbortSignal) {
+    return courseProject.extend({ courseId: z.uuid(), createdAt: z.iso.datetime({ offset: true }) })
+      .parse(await this.http.get<unknown>(`/v1/projects/${encodeURIComponent(projectId)}`, signal));
+  }
+  async courseProjects(courseId: string, n: number, signal?: AbortSignal) {
+    return page(courseProject).parse(await this.http.get<unknown>(
+      `/v1/courses/${encodeURIComponent(courseId)}/projects?page=${n}&size=20`, signal,
+    ));
+  }
+  async createCourseProject(courseId: string, input: { name: string; description: string }) {
+    return z.object({ id: z.uuid() }).parse(await this.http.post<unknown>(
+      `/v1/courses/${encodeURIComponent(courseId)}/projects`, input,
+    ));
+  }
+  async linkOrganization(projectId: string, organizationLogin: string) {
+    await this.http.post(`/v1/projects/${encodeURIComponent(projectId)}/organization`, { organizationLogin });
+  }
   async courses(n: number, signal?: AbortSignal) {
     return page(course).parse(
       await this.http.get<unknown>(

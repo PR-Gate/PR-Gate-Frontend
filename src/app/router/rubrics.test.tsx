@@ -23,6 +23,7 @@ async function openRubrics(
   demo = true,
 ) {
   const auth = createDemoSession();
+  if (!demo) vi.spyOn(auth, 'getAccessToken').mockResolvedValue('fixture-token');
   await auth.login({ profile: role === 'student' ? 'student' : 'teacher' });
   if (role === 'admin')
     vi.spyOn(auth, 'getUser').mockResolvedValue({
@@ -318,11 +319,16 @@ it('handles failed loading with retry', async () => {
 });
 it('does not request provisional rubric endpoints in real authentication mode', async () => {
   const request = vi.fn(() => HttpResponse.json({}));
-  server.use(http.get('http://localhost/api/demo/rubrics', request));
+  const catalog = vi.fn(() => HttpResponse.json({ items: [], page: 0, size: 100, hasNext: false }));
+  server.use(
+    http.get('http://localhost/api/demo/rubrics', request),
+    http.get('http://localhost/api/me/evaluations/catalog/courses', catalog),
+  );
   await openRubrics('teacher', '/teacher/rubrics', false);
   expect(
-    await screen.findByText(/La conexión real de rúbricas se habilitará/),
+    await screen.findByText(/No tienes cursos disponibles/),
   ).toBeInTheDocument();
   await act(async () => {});
   expect(request).not.toHaveBeenCalled();
+  expect(catalog).toHaveBeenCalled();
 });

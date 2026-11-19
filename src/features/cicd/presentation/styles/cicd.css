@@ -67,6 +67,18 @@
   gap: 20px;
   padding: 24px;
 }
+.cicd-run-picker {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+}
+.cicd-run-picker :is(input, select) {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  padding: 10px 12px;
+}
 .cicd-summary dt {
   font-size: 10px;
   text-transform: uppercase;
@@ -156,6 +168,25 @@
   border: 1px solid #dce5fa;
   border-radius: 10px;
   background: #f1f5ff;
+}
+.cicd-page [data-tone='positive'] {
+  background: #dcfce7;
+  color: #166534;
+}
+.cicd-page [data-tone='negative'] {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.cicd-page [data-tone='pending'] {
+  background: #fef3c7;
+  color: #92400e;
+}
+.cicd-page [data-tone='link'] {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.cicd-summary .cicd-badge {
+  font-size: 13px;
 }
 .cicd-notice svg,
 .cicd-data-notice svg {

@@ -25,6 +25,7 @@ import { useAuth } from '@/shared/services/auth/auth-context';
 import { useUiStore } from '@/shared/stores/ui.store';
 import { Button } from '@/shared/components/ui/button';
 import { navigation, teacherNavigation } from '../config/routes.config';
+import { ActiveProjectSelector } from '@/features/projects/presentation/components/active-project-selector';
 const icons = {
   pipelines: GitBranch,
   dashboard: LayoutDashboard,
@@ -63,8 +64,10 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
         (item) => item.path !== '/my-rubric' || user?.roles.includes('STUDENT'),
       );
   const location = useLocation();
+  const destination = (path: string) =>
+    !demo && isTeacher && path === '/projects' ? '/teacher/projects' : path;
   const current =
-    items.find((item) => location.pathname === item.path.split('#')[0])
+    items.find((item) => location.pathname === destination(item.path).split('#')[0])
       ?.label ?? 'Espacio académico';
   return (
     <div
@@ -101,7 +104,8 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
             </span>
           </span>
         </Link>
-        {!isTeacher && (
+        {!demo && !isTeacher && user?.roles.includes('STUDENT') && <ActiveProjectSelector />}
+        {demo && !isTeacher && (
           <div className="dashboard-sidebar-expanded mx-4 mb-8 flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3">
             <GraduationCap size={20} className="text-sidebar-highlight" />
             <div className="flex-1">
@@ -122,7 +126,7 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
             return (
               <NavLink
                 key={item.path}
-                to={item.path}
+                to={destination(item.path)}
                 title={item.label}
                 aria-label={item.label}
                 aria-current={item.path.includes('#') ? false : undefined}

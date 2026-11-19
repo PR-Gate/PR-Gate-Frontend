@@ -6,7 +6,10 @@ import { useAuth } from '@/shared/services/auth/auth-context';
 const StudentDashboardPage = lazy(async () => ({
   default: (await import('@/features/metrics')).StudentDashboardPage,
 }));
-export function DashboardPage() {
+const LiveStudentDashboardPage = lazy(async () => ({
+  default: (await import('@/features/metrics/presentation/pages/live-student-dashboard.page')).LiveStudentDashboardPage,
+}));
+export function DashboardPage({ demo = true }: { demo?: boolean }) {
   const { user } = useAuth();
   if (
     user?.roles.includes('STUDENT') &&
@@ -14,7 +17,7 @@ export function DashboardPage() {
   ) {
     return (
       <Suspense fallback={<p role="status">Cargando resumen…</p>}>
-        <StudentDashboardPage />
+        {demo ? <StudentDashboardPage /> : <LiveStudentDashboardPage />}
       </Suspense>
     );
   }

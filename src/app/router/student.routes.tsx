@@ -10,6 +10,10 @@ export function createStudentRoutes(demo: boolean): RouteObject[] {
         {
           path: studentRoutes.list,
           lazy: async () => {
+            if (!demo) {
+              const { LiveTeacherStudentsPage } = await import('@/features/users/presentation/pages/live-teacher-students.page');
+              return { Component: LiveTeacherStudentsPage };
+            }
             const { TeacherStudentsPage } = await import('@/features/users');
             return { Component: TeacherStudentsPage };
           },
@@ -26,7 +30,7 @@ export function createStudentRoutes(demo: boolean): RouteObject[] {
                 ) : (
                   <ModulePlaceholder
                     title="Contribución del estudiante"
-                    description="La consulta real de contribuciones está pendiente del backend."
+                    description="Todavía no hay datos de contribución individual disponibles."
                   />
                 ),
             };

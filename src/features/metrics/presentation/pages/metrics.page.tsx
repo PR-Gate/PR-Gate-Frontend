@@ -1,9 +1,4 @@
-import { ModulePlaceholder } from '@/shared/components/common/module-placeholder';
+import { EvaluationWorkspacePage } from './evaluation-workspace.page';
 export function MetricsPage() {
-  return (
-    <ModulePlaceholder
-      title="Métricas del proyecto"
-      description="Visualiza cobertura, duplicación, deuda técnica, vulnerabilidades y contribuciones cuando el servicio de métricas publique su contrato."
-    />
-  );
+  return <EvaluationWorkspacePage />;
 }

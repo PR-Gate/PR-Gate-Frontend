@@ -1,11 +1,14 @@
 import type { StudentOverview } from '../../domain/entities/student-overview.entity';
 import { Button } from '@/shared/components/ui/button';
+import { Link } from 'react-router';
 import { formatStudentValue } from '../utils/student-overview-format';
 
 export function StudentLatestEvaluation({
   overview,
+  resultPath,
 }: {
   overview?: StudentOverview;
+  resultPath?: string;
 }) {
   const evaluation = overview?.latestEvaluation;
   const metrics = evaluation?.metrics ?? [
@@ -63,7 +66,7 @@ export function StudentLatestEvaluation({
         </p>
         <p>
           {evaluation?.grade
-            ? 'Calificación de la evaluación'
+            ? resultPath ? 'Estimación orientativa de IA' : 'Calificación de la evaluación'
             : 'Tu calificación aparecerá después de una evaluación.'}
         </p>
       </div>
@@ -86,6 +89,9 @@ export function StudentLatestEvaluation({
           </div>
         ))}
       </dl>
+      {resultPath ? (
+        <Button asChild variant="outline" className="w-full"><Link to={resultPath}>Entender mi resultado</Link></Button>
+      ) : <>
       <Button
         variant="outline"
         disabled
@@ -97,6 +103,7 @@ export function StudentLatestEvaluation({
       <p className="student-action-help" id="student-result-help">
         Disponible cuando puedas consultar el detalle de tu evaluación.
       </p>
+      </>}
     </section>
   );
 }
