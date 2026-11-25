@@ -95,7 +95,13 @@ export class EvaluationApiService implements EvaluationRepositoryPort {
   async configurations(p: string, repositoryId: number, signal?: AbortSignal) { return z.array(configuration).parse(await this.http.get<unknown>(`${project(p)}/configurations?repositoryId=${repositoryId}`, signal)); }
   async configuration(p: string, key: string, signal?: AbortSignal) { return configuration.parse(await this.http.get<unknown>(`${project(p)}/configurations/${encodeURIComponent(key)}`, signal)); }
   async publish(p: string, input: PublishRubricInput, previousId?: string) { return rubric.parse(await this.http.post<unknown>(`${root}/courses/${encodeURIComponent(p)}/rubrics${previousId ? `/${encodeURIComponent(previousId)}/versions` : ''}`, input)); }
-  async approve(p: string, input: ApproveEvaluationInput) { return configuration.parse(await this.http.post<unknown>(`${project(p)}/configurations`, input)); }
+  async courseGate(courseId: string, signal?: AbortSignal) {
+    const schema = z.array(z.object({ rubric, checks: z.array(check) }));
+    return schema.parse(await this.http.get<unknown>(`${root}/courses/${encodeURIComponent(courseId)}/rubrics/quality-gate`, signal))[0];
+  }
+  async approveCourseGate(courseId: string, input: ApproveEvaluationInput) {
+    await this.http.post<unknown>(`${root}/courses/${encodeURIComponent(courseId)}/rubrics/quality-gate`, input);
+  }
   async gate(p: string, key: string, signal?: AbortSignal) { return gate.parse(await this.http.get<unknown>(`${project(p)}/configurations/${encodeURIComponent(key)}/quality-gate`, signal)); }
   async retryGate(p: string, key: string) { return gate.parse(await this.http.post<unknown>(`${project(p)}/configurations/${encodeURIComponent(key)}/quality-gate/retry`, {})); }
   async analyses(p: string, repository: EvaluationRepository, n: number, signal?: AbortSignal) { return z.array(analysis).parse(await this.http.get<unknown>(`${project(p)}/analyses?repositoryId=${repository.id}&gitRef=${encodeURIComponent(repository.gitRef)}&page=${n}&size=20`, signal)); }

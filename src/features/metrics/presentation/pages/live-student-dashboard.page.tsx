@@ -135,7 +135,6 @@ export function LiveStudentDashboardPage() {
           <article className="student-panel space-y-3 p-6">
             <h2 className="flex items-center gap-2 font-semibold"><ShieldCheck size={18} className="text-primary" />Quality Gate</h2>
             {runs.isSuccess && <p className="text-sm text-muted-foreground">{gate === 'OK' ? 'Aprobado' : gate === 'ERROR' ? 'Fallido' : gate ?? 'Sin resultado de SonarQube para la última ejecución.'}</p>}
-            <Button asChild variant="outline"><Link to="/my-rubric">Ver rúbrica y resultados</Link></Button>
           </article>
         </div>
       )}

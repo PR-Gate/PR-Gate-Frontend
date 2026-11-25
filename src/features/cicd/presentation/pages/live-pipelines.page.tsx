@@ -62,11 +62,10 @@ export function LivePipelinesPage() {
     : null;
   const stages = [
     ['Commit', 'Recibido', run ? `${run.branch} · ${run.commitSha}` : '', 'positive'],
-    ['Build', 'Ver en GitHub', 'Consulta el resultado de la compilación en GitHub Actions.', 'link'],
-    ['Tests', 'Ver en GitHub', 'Consulta los resultados de las pruebas en GitHub Actions.', 'link'],
+    ['Build', 'GitHub Actions', 'Consulta el resultado de la compilación en GitHub Actions.', 'link'],
+    ['Tests', 'GitHub Actions', 'Consulta los resultados de las pruebas en GitHub Actions.', 'link'],
     ['SonarQube', run?.sonarAnalysis ? 'Recibido' : 'Sin resultado recibido', 'Análisis técnico del código.', run?.sonarAnalysis ? 'positive' : 'neutral'],
     ['Quality Gate', gate ? labels[gate] ?? gate : 'Sin resultado recibido', 'Resultado reportado por SonarQube.', gate ? tones[gate] ?? 'neutral' : 'neutral'],
-    ['Evaluación', 'Ver evaluación', 'Consulta los resultados académicos del proyecto.', 'link'],
   ] as const;
   return (
     <section className="cicd-page">
@@ -164,7 +163,7 @@ export function LivePipelinesPage() {
               })}
             </ol>
             <Button asChild variant="outline">
-              <a href={run.runUrl} target="_blank" rel="noreferrer">Ver etapas en GitHub Actions</a>
+              <a href={run.runUrl} target="_blank" rel="noreferrer">Ver build y tests en GitHub Actions</a>
             </Button>
           </section>
           <aside className="cicd-notice">
@@ -173,7 +172,7 @@ export function LivePipelinesPage() {
           </aside>
           <div className="cicd-footer">
             <Button asChild variant="outline">
-              <Link to={`/projects/${encodeURIComponent(projectId)}/quality-gates`}>Ver resultado del Quality Gate</Link>
+              <Link to={`/my-rubric?projectId=${encodeURIComponent(projectId)}`}>Ver rúbrica y resultados</Link>
             </Button>
           </div>
         </>

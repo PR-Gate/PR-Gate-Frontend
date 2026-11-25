@@ -50,7 +50,7 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
   const isTeacher = user?.roles.some((role) =>
     ['TEACHER', 'ADMIN'].includes(role),
   );
-  const items = isTeacher
+  const roleItems = isTeacher
     ? teacherNavigation.filter(
         (item) =>
           ![
@@ -63,6 +63,11 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
     : navigation.filter(
         (item) => item.path !== '/my-rubric' || user?.roles.includes('STUDENT'),
       );
+  const items = roleItems.filter(
+    (item) =>
+      demo ||
+      !['/notifications', '/teacher/analytics', '/teacher/evaluations'].includes(item.path),
+  );
   const location = useLocation();
   const destination = (path: string) =>
     !demo && isTeacher && path === '/projects' ? '/teacher/projects' : path;
@@ -245,13 +250,6 @@ export function DashboardLayout({ demo }: { demo: boolean }) {
                 DEMO · Datos simulados
               </span>
             )}
-            <Link
-              to="/notifications"
-              aria-label="Notificaciones"
-              className="rounded-lg p-2 hover:bg-muted"
-            >
-              <Bell size={18} />
-            </Link>
           </div>
         </header>
         <main

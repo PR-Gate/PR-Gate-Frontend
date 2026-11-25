@@ -4,6 +4,7 @@ import { interpretRubricDocument } from '../../application/use-cases/interpret-r
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
 import { Button } from '@/shared/components/ui/button';
@@ -13,6 +14,7 @@ import { HttpError } from '@/shared/services/http/http-error';
 import type { PublishedRubric } from '../../domain/evaluation';
 import { useEvaluationApi } from '../hooks/use-evaluation';
 import { EvaluationError } from './evaluation-feedback';
+import { LiveRubricEditor } from './live-rubric-editor';
 
 const emptyCriterion = () => ({
   id: crypto.randomUUID(),
@@ -33,6 +35,7 @@ export function CourseRubricLibrary({
   const { user } = useAuth();
   const [draft, setDraft] = useState<PublishedRubric | null | undefined>();
   const [toArchive, setToArchive] = useState<PublishedRubric>();
+  const [toConfigure, setToConfigure] = useState<PublishedRubric>();
   const [source, setSource] = useState<{ name: string; text: string }>();
   const upload = useMutation({
     mutationFn: async (file: File) => ({
@@ -54,10 +57,17 @@ export function CourseRubricLibrary({
       last.length === 100 ? page + 1 : undefined,
   });
   const items = rubrics.data?.pages.flat() ?? [];
+  const gateKey = ['live-evaluation', user?.id, 'course-gate', courseId];
+  const gate = useQuery({
+    queryKey: gateKey,
+    enabled: teacher && items.length > 0,
+    queryFn: async ({ signal }) => (await api.courseGate(courseId, signal)) ?? null,
+  });
   const archive = useMutation({
     mutationFn: (rubricId: string) => api.archiveRubric(courseId, rubricId),
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey });
+      void client.invalidateQueries({ queryKey: gateKey });
       setToArchive(undefined);
     },
   });
@@ -120,6 +130,11 @@ export function CourseRubricLibrary({
           </ul>
           {teacher && (
             <div className="evaluation-actions">
+              <Button variant="outline" disabled={!gate.isSuccess} onClick={() => setToConfigure(rubric)}>
+                {gate.data?.rubric.id === rubric.id && gate.data.rubric.version === rubric.version
+                  ? 'Editar Quality Gate del curso'
+                  : 'Configurar Quality Gate del curso'}
+              </Button>
               <Button variant="outline" onClick={() => setDraft(rubric)}>
                 Nueva versión
               </Button>
@@ -133,6 +148,29 @@ export function CourseRubricLibrary({
           )}
         </article>
       ))}
+      {teacher && gate.isError && <EvaluationError retry={() => void gate.refetch()} />}
+      {teacher && gate.data && (
+        <p className="evaluation-subtitle">Quality Gate publicado con la versión {gate.data.rubric.version} de «{gate.data.rubric.title}».</p>
+      )}
+      {toConfigure && (
+        <Dialog
+          open
+          onOpenChange={(open) => { if (!open) setToConfigure(undefined); }}
+          title="Configurar Quality Gate del curso"
+          description="Publica las condiciones de la rúbrica para todos los proyectos de este curso."
+          contentClassName="max-w-3xl"
+        >
+          <LiveRubricEditor
+            courseId={courseId}
+            rubric={toConfigure}
+            checks={gate.data?.rubric.id === toConfigure.id ? gate.data.checks : undefined}
+            onSaved={() => {
+              setToConfigure(undefined);
+              void client.invalidateQueries({ queryKey: ['live-evaluation', user?.id] });
+            }}
+          />
+        </Dialog>
+      )}
       {rubrics.hasNextPage && (
         <Button
           variant="outline"

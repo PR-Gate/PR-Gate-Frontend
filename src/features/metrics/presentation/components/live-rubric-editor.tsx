@@ -2,9 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/shared/components/ui/button';
 import type {
-  ApprovedEvaluation,
-  EvaluationRepository,
   PublishedRubric,
+  EvaluationCheck,
 } from '../../domain/evaluation';
 import { useEvaluationApi } from '../hooks/use-evaluation';
 import { EvaluationError } from './evaluation-feedback';
@@ -42,36 +41,33 @@ const blankCriterion = (): DraftCriterion => ({
 });
 
 export function LiveRubricEditor({
-  projectId,
-  repository,
+  courseId,
   rubric,
-  configureOnly = false,
+  checks,
   onSaved,
 }: {
-  projectId: string;
-  repository: EvaluationRepository;
-  rubric?: PublishedRubric;
-  configureOnly?: boolean;
-  onSaved: (value: ApprovedEvaluation) => void;
+  courseId: string;
+  rubric: PublishedRubric;
+  checks?: EvaluationCheck[];
+  onSaved: () => void;
 }) {
   const api = useEvaluationApi();
   const { proposal } = useRubricProposal(rubric);
-  const [title, setTitle] = useState(rubric?.title ?? '');
   const [criteria, setCriteria] = useState<DraftCriterion[]>(() =>
-    rubric
-      ? rubric.criteria.map((c) => ({
-          ...blankCriterion(),
-          ...c,
-          type: 'MANUAL',
-          points: String(c.maxPoints),
-        }))
-      : [blankCriterion()],
-  );
-  const [published, setPublished] = useState<PublishedRubric | undefined>(
-    configureOnly ? rubric : undefined,
+    rubric.criteria.map((criterion) => {
+      const check = checks?.find((item) => item.criterionId === criterion.id && item.type === 'METRIC');
+      return {
+        ...blankCriterion(),
+        ...criterion,
+        points: String(criterion.maxPoints),
+        type: check ? 'METRIC' : 'MANUAL',
+        metric: check?.key ?? '',
+        operator: check?.operator === 'GTE' ? 'GTE' : 'LTE',
+        threshold: check?.threshold?.toString() ?? '',
+      };
+    }),
   );
   const [validation, setValidation] = useState('');
-  const frozen = Boolean(published);
   function applyProposal() {
     if (!proposal) return;
     setCriteria((current) =>
@@ -113,29 +109,10 @@ export function LiveRubricEditor({
       current.map((c) => (c.id === id ? { ...c, ...value } : c)),
     );
   const save = useMutation({
-    mutationFn: async () => {
-      let version = published;
-      if (!version) {
-        version = await api.publish(
-          projectId,
-          {
-            title: title.trim(),
-            criteria: criteria.map((c) => ({
-              id: c.id,
-              description: c.description.trim(),
-              objective: c.objective.trim(),
-              maxPoints: Number(c.points),
-            })),
-          },
-          rubric?.id,
-        );
-        setPublished(version);
-      }
-      return api.approve(projectId, {
-        rubricId: version.id,
-        rubricVersion: version.version,
-        repositoryId: repository.id,
-        gitRef: repository.gitRef,
+    mutationFn: () =>
+      api.approveCourseGate(courseId, {
+        rubricId: rubric.id,
+        rubricVersion: rubric.version,
         checks: criteria.map((c) => ({
           criterionId: c.id,
           type: c.type,
@@ -143,15 +120,13 @@ export function LiveRubricEditor({
           operator: c.type === 'MANUAL' ? null : c.operator,
           threshold: c.type === 'MANUAL' ? null : Number(c.threshold),
         })),
-      });
-    },
+      }),
     onSuccess: onSaved,
   });
   function submit(event: FormEvent) {
     event.preventDefault();
     setValidation('');
     if (
-      !title.trim() ||
       total !== 20 ||
       criteria.some(
         (c) =>
@@ -199,11 +174,15 @@ export function LiveRubricEditor({
       }
       conditions.set(criterion.metric, criterion);
     }
+    if (conditions.size === 0) {
+      setValidation('Configura al menos una métrica para publicar el Quality Gate.');
+      return;
+    }
     save.mutate();
   }
   return (
     <form className="evaluation-form" onSubmit={submit}>
-      {proposal && configureOnly && (
+      {proposal && (
         <div>
           <Button
             type="button"
@@ -219,20 +198,7 @@ export function LiveRubricEditor({
           </p>
         </div>
       )}
-      <label>
-        Nombre de la rúbrica
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          disabled={frozen || save.isPending}
-          maxLength={200}
-          required
-        />
-      </label>
-      <p className="evaluation-subtitle">
-        Condiciones para {repository.fullName}, rama{' '}
-        {repository.gitRef.replace('refs/heads/', '')}.
-      </p>
+      <p className="evaluation-subtitle">{rubric.title} · Versión {rubric.version}</p>
       {criteria.map((criterion, index) => (
         <fieldset
           key={criterion.id}
@@ -248,7 +214,7 @@ export function LiveRubricEditor({
                 onChange={(e) =>
                   update(criterion.id, { description: e.target.value })
                 }
-                disabled={frozen}
+                readOnly
                 maxLength={1000}
                 required
               />
@@ -264,7 +230,7 @@ export function LiveRubricEditor({
                 onChange={(e) =>
                   update(criterion.id, { points: e.target.value })
                 }
-                disabled={frozen}
+                readOnly
                 required
               />
             </label>
@@ -276,7 +242,7 @@ export function LiveRubricEditor({
               onChange={(e) =>
                 update(criterion.id, { objective: e.target.value })
               }
-              disabled={frozen}
+              readOnly
               maxLength={1000}
               required
             />
@@ -345,63 +311,22 @@ export function LiveRubricEditor({
               </label>
             </div>
           )}
-          {!frozen && criteria.length > 1 && (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() =>
-                setCriteria((current) =>
-                  current.filter((c) => c.id !== criterion.id),
-                )
-              }
-            >
-              Quitar criterio {index + 1}
-            </Button>
-          )}
         </fieldset>
       ))}
-      {!frozen && (
-        <Button
-          type="button"
-          variant="outline"
-          disabled={save.isPending || criteria.length >= 100}
-          onClick={() =>
-            setCriteria((current) => [...current, blankCriterion()])
-          }
-        >
-          Añadir criterio
-        </Button>
-      )}
       <p className="evaluation-total">
         Total de la rúbrica: <strong>{total} / 20 puntos</strong>
       </p>
       <p className="evaluation-subtitle">
-        Las condiciones se enviarán a SonarQube. La rúbrica publicada se
-        conserva como una versión y la IA podrá generar una estimación, no una
-        calificación oficial.
+        Todos los proyectos del curso usan estas condiciones. Cada repositorio conserva su historial.
       </p>
       {validation && (
         <p role="alert" className="evaluation-validation">
           {validation}
         </p>
       )}
-      {save.isError && (
-        <>
-          <EvaluationError />
-          {published && (
-            <p>
-              La rúbrica quedó guardada. Puedes reintentar la configuración sin
-              volver a publicarla.
-            </p>
-          )}
-        </>
-      )}
+      {save.isError && <EvaluationError />}
       <Button type="submit" disabled={save.isPending}>
-        {save.isPending
-          ? 'Guardando…'
-          : published
-            ? 'Confirmar condiciones'
-            : 'Publicar y configurar Quality Gate'}
+        {save.isPending ? 'Publicando…' : 'Publicar Quality Gate del curso'}
       </Button>
     </form>
   );

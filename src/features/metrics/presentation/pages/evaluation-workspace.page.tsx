@@ -5,15 +5,11 @@ import { useActiveProject } from '@/features/projects/presentation/hooks/use-act
 import {
   useInfiniteQuery,
   useQuery,
-  useQueryClient,
 } from '@tanstack/react-query';
 import { Button } from '@/shared/components/ui/button';
-import { Dialog } from '@/shared/components/ui/dialog';
 import { useAuth } from '@/shared/services/auth/auth-context';
 import type {
   AcademicProject,
-  EvaluationRepository,
-  PublishedRubric,
 } from '../../domain/evaluation';
 import { useEvaluationApi } from '../hooks/use-evaluation';
 import {
@@ -21,7 +17,6 @@ import {
   EvaluationError,
 } from '../components/evaluation-feedback';
 import { CourseRubricLibrary } from '../components/course-rubric-library';
-import { LiveRubricEditor } from '../components/live-rubric-editor';
 import { RepositoryEvaluationPanel } from '../components/repository-evaluation-panel';
 import '../styles/evaluation-workspace.css';
 
@@ -216,31 +211,14 @@ function ProjectEvaluationWorkspace({
 }) {
   const api = useEvaluationApi();
   const { user } = useAuth();
-  const client = useQueryClient();
   const [repositoryKey, setRepositoryKey] = useState('');
-  const [editor, setEditor] = useState<{
-    rubric?: PublishedRubric;
-    configureOnly?: boolean;
-  } | null>(null);
   const repositories = useQuery({
     queryKey: ['live-evaluation', user?.id, project.id, 'repositories'],
     queryFn: ({ signal }) => api.repositories(project.id, signal),
   });
-  const rubrics = useInfiniteQuery({
-    queryKey: ['live-evaluation', user?.id, 'course-rubrics', project.courseId],
-    enabled: teacher,
-    initialPageParam: 0,
-    queryFn: ({ pageParam, signal }) =>
-      api.rubrics(project.courseId, pageParam, signal),
-    getNextPageParam: (last, _, n) => (last.length === 100 ? n + 1 : undefined),
-  });
   const repository = repositories.data?.find(
     (r) => `${r.id}:${r.gitRef}` === repositoryKey,
   );
-  const refresh = () =>
-    client.invalidateQueries({
-      queryKey: ['live-evaluation', user?.id, project.id],
-    });
   return (
     <>
       <section className="evaluation-card">
@@ -277,61 +255,11 @@ function ProjectEvaluationWorkspace({
         {repositories.isSuccess && repositories.data.length === 0 && (
           <EvaluationEmpty>
             {project.organizationLogin
-              ? 'Todavía no hay análisis recibidos para los repositorios de esta organización. Realiza primero un push válido con la integración de GitHub configurada.'
-              : 'Vincula la organización del grupo a este proyecto antes de configurar su evaluación.'}
+              ? 'Todavía no hay análisis recibidos para los repositorios de esta organización. Realiza un push válido con la integración de GitHub configurada para ver los resultados.'
+              : 'Vincula la organización del grupo para consultar los resultados del proyecto.'}
           </EvaluationEmpty>
         )}
       </section>
-      {teacher && <section className="evaluation-card">
-        <h2>Rúbricas disponibles para el Quality Gate</h2>
-        {rubrics.isError && (
-          <EvaluationError retry={() => void rubrics.refetch()} />
-        )}
-        {rubrics.isPending && <p role="status">Cargando rúbricas…</p>}
-        {rubrics.isSuccess && !rubrics.data.pages.some((p) => p.length) && (
-          <EvaluationEmpty>
-            Aún no hay rúbricas publicadas para este curso.
-          </EvaluationEmpty>
-        )}
-        <div className="evaluation-rubric-grid">
-          {rubrics.data?.pages.flat().map((r) => (
-            <article key={`${r.id}:${r.version}`} className="evaluation-rubric">
-              <h3>{r.title}</h3>
-              <p>
-                Versión {r.version} · {r.maxPoints} puntos
-              </p>
-              <ul>
-                {r.criteria.map((c) => (
-                  <li key={c.id}>
-                    {c.description} <strong>{c.maxPoints} pts</strong>
-                  </li>
-                ))}
-              </ul>
-              {teacher && (
-                <div className="evaluation-actions">
-                  <Button
-                    variant="outline"
-                    disabled={!repository}
-                    onClick={() =>
-                      setEditor({ rubric: r, configureOnly: true })
-                    }
-                  >
-                    Configurar condiciones
-                  </Button>
-                </div>
-              )}
-            </article>
-          ))}
-        </div>
-        {rubrics.hasNextPage && (
-          <Button
-            variant="outline"
-            onClick={() => void rubrics.fetchNextPage()}
-          >
-            Cargar más rúbricas
-          </Button>
-        )}
-      </section>}
       {repository && (
         <RepositoryEvaluationPanel
           key={`${project.id}:${repositoryKey}`}
@@ -339,34 +267,6 @@ function ProjectEvaluationWorkspace({
           repository={repository}
           teacher={teacher}
         />
-      )}
-      {editor && repository && (
-        <Dialog
-          open
-          onOpenChange={(open) => {
-            if (!open) setEditor(null);
-          }}
-          title={
-            editor.configureOnly
-              ? 'Configurar condiciones'
-              : editor.rubric
-                ? 'Publicar nueva versión'
-                : 'Crear rúbrica de 20 puntos'
-          }
-          description="Define los criterios y aprueba las condiciones técnicas que se aplicarán al repositorio."
-          contentClassName="max-w-3xl"
-        >
-          <LiveRubricEditor
-            projectId={project.id}
-            repository={repository as EvaluationRepository}
-            rubric={editor.rubric}
-            configureOnly={editor.configureOnly}
-            onSaved={() => {
-              setEditor(null);
-              void refresh();
-            }}
-          />
-        </Dialog>
       )}
     </>
   );

@@ -2,7 +2,6 @@ import {
   BookOpen,
   Check,
   Clock3,
-  Download,
   Folder,
   Info,
   ShieldAlert,
@@ -38,19 +37,6 @@ export function TeacherSummaryPage() {
           <p>Esto es lo que requiere tu atención hoy.</p>
         </div>
         <div className="teacher-summary-actions">
-          <div>
-            <Button
-              variant="outline"
-              disabled
-              aria-describedby="teacher-export-help"
-            >
-              <Download size={16} aria-hidden="true" />
-              Exportar reporte
-            </Button>
-            <p id="teacher-export-help">
-              Disponible cuando haya datos del curso.
-            </p>
-          </div>
           <Button asChild>
             <Link to="/projects">
               <Folder size={16} aria-hidden="true" />

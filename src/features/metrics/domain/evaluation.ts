@@ -13,7 +13,7 @@ export interface TechnicalEvaluation { id: string; configurationId: string; even
 export interface AnalysisEvidence { reference: AnalysisRevision; evidence: { state: string; measures: Record<string, number> } }
 export interface GradeEstimate { id: string; status: 'COMPLETE' | 'PARTIAL'; officialGrade: false; maxScore: 20; estimatedScore: number | null; estimatedSubtotal: number; coveredMaxPoints: number; summary: string; criteria: { criterionId: string; estimatedPoints: number | null; justification: string }[] }
 export interface PublishRubricInput { title: string; criteria: RubricCriterion[] }
-export interface ApproveEvaluationInput { rubricId: string; rubricVersion: number; repositoryId: number; gitRef: string; checks: Omit<EvaluationCheck, 'id'>[] }
+export interface ApproveEvaluationInput { rubricId: string; rubricVersion: number; checks: Omit<EvaluationCheck, 'id'>[] }
 export interface EvaluationRepositoryPort {
   practice(projectId: string, signal?: AbortSignal): Promise<{ canGenerate: boolean; tests: PracticeTest[] }>;
   generatePractice(projectId: string): Promise<PracticeTest>;
@@ -32,7 +32,8 @@ export interface EvaluationRepositoryPort {
   configurations(projectId: string, repositoryId: number, signal?: AbortSignal): Promise<ApprovedEvaluation[]>;
   configuration(projectId: string, id: string, signal?: AbortSignal): Promise<ApprovedEvaluation>;
   publish(projectId: string, input: PublishRubricInput, previousId?: string): Promise<PublishedRubric>;
-  approve(projectId: string, input: ApproveEvaluationInput): Promise<ApprovedEvaluation>;
+  courseGate(courseId: string, signal?: AbortSignal): Promise<{ rubric: PublishedRubric; checks: EvaluationCheck[] } | undefined>;
+  approveCourseGate(courseId: string, input: ApproveEvaluationInput): Promise<void>;
   gate(projectId: string, configurationId: string, signal?: AbortSignal): Promise<GateSynchronization>;
   retryGate(projectId: string, configurationId: string): Promise<GateSynchronization>;
   analyses(projectId: string, repository: EvaluationRepository, page: number, signal?: AbortSignal): Promise<AnalysisRevision[]>;
